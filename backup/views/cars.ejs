@@ -1,0 +1,70 @@
+<%
+const content = `
+<section style="padding: 150px 0 80px; background: var(--bg-light);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Our Fleet</span>
+            <h1>Choose Your <span class="gradient-text">Ride</span></h1>
+            <p>Explore our premium collection of vehicles for every occasion.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=500" alt="Luxury Car">
+                </div>
+                <div class="car-info">
+                    <h3>Mercedes-Benz S-Class</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 4 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 2 Bags</span>
+                        <span><i class="fas fa-gas-pump"></i> Petrol</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$199</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1566473965997-3de9c817e938?w=500" alt="SUV">
+                </div>
+                <div class="car-info">
+                    <h3>Range Rover Sport</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 5 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 3 Bags</span>
+                        <span><i class="fas fa-gas-pump"></i> Diesel</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$249</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500" alt="Sports Car">
+                </div>
+                <div class="car-info">
+                    <h3>Porsche 911</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 2 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 1 Bag</span>
+                        <span><i class="fas fa-gas-pump"></i> Petrol</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$349</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+`;
+%>
+<%- include('layout', { title: 'Our Fleet - GetMeYatra', content: content }) %>

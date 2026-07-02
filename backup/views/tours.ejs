@@ -1,0 +1,37 @@
+<%
+const content = `
+<section style="padding: 150px 0 80px; background: var(--bg-light);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Tours</span>
+            <h1>Group <span class="gradient-text">Adventures</span></h1>
+            <p>Curated group experiences for unforgettable memories.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <div style="padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow);">
+                <i class="fas fa-mountain" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 15px;">Mountain Expedition</h3>
+                <p style="color: var(--text-gray);">7-day group adventure through the mountains.</p>
+                <p style="font-size: 24px; font-weight: 800; color: var(--primary); margin: 20px 0;">$999</p>
+                <a href="/contact" class="btn-primary btn-small">Book Now</a>
+            </div>
+            <div style="padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow);">
+                <i class="fas fa-umbrella-beach" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 15px;">Beach Getaway</h3>
+                <p style="color: var(--text-gray);">5-day coastal tour with beach activities.</p>
+                <p style="font-size: 24px; font-weight: 800; color: var(--primary); margin: 20px 0;">$799</p>
+                <a href="/contact" class="btn-primary btn-small">Book Now</a>
+            </div>
+            <div style="padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow);">
+                <i class="fas fa-city" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 15px;">City Explorer</h3>
+                <p style="color: var(--text-gray);">3-day urban adventure with local guides.</p>
+                <p style="font-size: 24px; font-weight: 800; color: var(--primary); margin: 20px 0;">$499</p>
+                <a href="/contact" class="btn-primary btn-small">Book Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+`;
+%>
+<%- include('layout', { title: 'Group Tours - GetMeYatra', content: content }) %>

@@ -1,0 +1,38 @@
+<%
+const content = `
+<section style="padding: 150px 0 80px; background: var(--bg-light);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">About Us</span>
+            <h1>Your Trusted Travel <span class="gradient-text">Partner</span></h1>
+        </div>
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <p style="font-size: 18px; color: var(--text-gray); line-height: 1.8; margin-bottom: 30px;">
+                GetMeYatra was founded with a simple mission: to make travel accessible, 
+                enjoyable, and memorable for everyone. We specialize in premium car rentals 
+                and curated group tours that transform ordinary trips into extraordinary journeys.
+            </p>
+            <p style="font-size: 18px; color: var(--text-gray); line-height: 1.8; margin-bottom: 40px;">
+                With over 5,000 happy customers and a fleet of 200+ vehicles, 
+                we're committed to providing exceptional service and unforgettable experiences.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px;">
+                <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
+                    <h3 style="font-size: 36px; color: var(--primary);">5K+</h3>
+                    <p style="color: var(--text-gray);">Happy Customers</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
+                    <h3 style="font-size: 36px; color: var(--primary);">200+</h3>
+                    <p style="color: var(--text-gray);">Vehicles</p>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: var(--shadow);">
+                    <h3 style="font-size: 36px; color: var(--primary);">50+</h3>
+                    <p style="color: var(--text-gray);">Destinations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+`;
+%>
+<%- include('layout', { title: 'About Us - GetMeYatra', content: content }) %>

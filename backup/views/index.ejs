@@ -1,0 +1,308 @@
+<%
+const content = `
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <span class="hero-badge">🚗 Premium Car Rental & Tours</span>
+            <h1>Your Journey <br>Starts <span class="gradient-text">Here</span></h1>
+            <p>Experience luxury car rentals and unforgettable group tours. We turn your travel dreams into reality with premium vehicles and expert guides.</p>
+            <div class="hero-buttons">
+                <a href="/cars" class="btn-primary btn-large">Explore Fleet <i class="fas fa-arrow-right"></i></a>
+                <a href="/tours" class="btn-outline btn-large">View Tours <i class="fas fa-map"></i></a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600" alt="Luxury Car">
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <h3><span class="counter" data-target="5000">0</span>+</h3>
+                <p>Happy Customers</p>
+            </div>
+            <div class="stat-item">
+                <h3><span class="counter" data-target="200">0</span>+</h3>
+                <p>Premium Vehicles</p>
+            </div>
+            <div class="stat-item">
+                <h3><span class="counter" data-target="50">0</span>+</h3>
+                <p>Destinations</p>
+            </div>
+            <div class="stat-item">
+                <h3><span class="counter" data-target="98">0</span>%</h3>
+                <p>Satisfaction Rate</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== SERVICES SECTION ===== -->
+<section class="services section-padding" id="services">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Our Services</span>
+            <h2>Premium <span class="gradient-text">Services</span></h2>
+            <p>We offer world-class car rentals and curated group tours for every type of traveler.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-car"></i></div>
+                <h3>Car Rental</h3>
+                <p>Luxury SUVs, sedans, and sports cars. Self-drive or chauffeur-driven options available.</p>
+                <a href="/cars" class="service-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-users"></i></div>
+                <h3>Group Tours</h3>
+                <p>Expert-led group experiences with customized itineraries for families and friends.</p>
+                <a href="/tours" class="service-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-hotel"></i></div>
+                <h3>Travel Packages</h3>
+                <p>All-inclusive packages combining transport, accommodation, and exciting activities.</p>
+                <a href="/tours" class="service-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-headset"></i></div>
+                <h3>24/7 Support</h3>
+                <p>Round-the-clock assistance to ensure your journey is smooth and memorable.</p>
+                <a href="/contact" class="service-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FEATURED CARS SECTION ===== -->
+<section class="featured-cars section-padding" id="cars">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Our Fleet</span>
+            <h2>Premium <span class="gradient-text">Collection</span></h2>
+            <p>Choose from our wide range of well-maintained luxury vehicles.</p>
+        </div>
+        <div class="cars-grid">
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=500" alt="Mercedes-Benz">
+                    <span class="car-badge">Luxury</span>
+                </div>
+                <div class="car-info">
+                    <h3>Mercedes-Benz S-Class</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 4 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 2 Bags</span>
+                        <span><i class="fas fa-gas-pump"></i> Petrol</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$199</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1566473965997-3de9c817e938?w=500" alt="Range Rover">
+                    <span class="car-badge">SUV</span>
+                </div>
+                <div class="car-info">
+                    <h3>Range Rover Sport</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 5 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 3 Bags</span>
+                        <span><i class="fas fa-gas-pump"></i> Diesel</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$249</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+            <div class="car-card">
+                <div class="car-image">
+                    <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500" alt="Porsche">
+                    <span class="car-badge">Sports</span>
+                </div>
+                <div class="car-info">
+                    <h3>Porsche 911</h3>
+                    <div class="car-details">
+                        <span><i class="fas fa-users"></i> 2 Seats</span>
+                        <span><i class="fas fa-suitcase"></i> 1 Bag</span>
+                        <span><i class="fas fa-gas-pump"></i> Petrol</span>
+                    </div>
+                    <div class="car-price">
+                        <span class="price">$349</span>
+                        <span class="per-day">/ day</span>
+                    </div>
+                    <a href="/contact" class="btn-primary btn-small">Book Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PACKAGES SECTION ===== -->
+<section class="packages section-padding" id="packages">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Travel Packages</span>
+            <h2>Popular <span class="gradient-text">Packages</span></h2>
+            <p>Curated experiences for every type of traveler.</p>
+        </div>
+        <div class="packages-grid">
+            <div class="package-card">
+                <div class="icon"><i class="fas fa-mountain"></i></div>
+                <h3>Mountain Expedition</h3>
+                <p>7-day group adventure through the mountains</p>
+                <div class="price-tag">$999</div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 7 Days / 6 Nights</li>
+                    <li><i class="fas fa-check"></i> Luxury SUV Transport</li>
+                    <li><i class="fas fa-check"></i> Expert Mountain Guide</li>
+                    <li><i class="fas fa-check"></i> All Accommodations</li>
+                </ul>
+                <a href="/contact" class="btn-primary">Book Now</a>
+            </div>
+            <div class="package-card featured">
+                <div class="icon"><i class="fas fa-umbrella-beach"></i></div>
+                <h3>Beach Getaway</h3>
+                <p>5-day coastal tour with beach activities</p>
+                <div class="price-tag">$799</div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 5 Days / 4 Nights</li>
+                    <li><i class="fas fa-check"></i> Premium Car Rental</li>
+                    <li><i class="fas fa-check"></i> Water Sports Included</li>
+                    <li><i class="fas fa-check"></i> Beachfront Resort</li>
+                </ul>
+                <a href="/contact" class="btn-primary">Book Now</a>
+            </div>
+            <div class="package-card">
+                <div class="icon"><i class="fas fa-city"></i></div>
+                <h3>City Explorer</h3>
+                <p>3-day urban adventure with local guides</p>
+                <div class="price-tag">$499</div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 3 Days / 2 Nights</li>
+                    <li><i class="fas fa-check"></i> Chauffeur Service</li>
+                    <li><i class="fas fa-check"></i> Guided City Tours</li>
+                    <li><i class="fas fa-check"></i> Fine Dining Included</li>
+                </ul>
+                <a href="/contact" class="btn-primary">Book Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== WHY CHOOSE US SECTION ===== -->
+<section class="why-choose section-padding" id="why-choose">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Why Choose Us</span>
+            <h2>Why <span class="gradient-text">GetMeYatra?</span></h2>
+            <p>We go above and beyond to make your journey exceptional.</p>
+        </div>
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                <h4>Safety First</h4>
+                <p>All vehicles are regularly maintained and sanitized for your safety.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon"><i class="fas fa-star"></i></div>
+                <h4>Premium Quality</h4>
+                <p>We offer only the best vehicles and most experienced tour guides.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                <h4>Best Price Guarantee</h4>
+                <p>Competitive pricing with no hidden charges. Transparent billing.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon"><i class="fas fa-clock"></i></div>
+                <h4>Flexible Booking</h4>
+                <p>Book and cancel with ease. We understand plans can change.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TESTIMONIALS SECTION ===== -->
+<section class="testimonials section-padding" id="testimonials">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Testimonials</span>
+            <h2>What Our <span class="gradient-text">Travelers Say</span></h2>
+            <p>Real experiences from real customers.</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"Amazing experience! The car was pristine and the tour was perfectly organized. Highly recommend!"</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" alt="John">
+                    <div>
+                        <h4>John Doe</h4>
+                        <span>Business Traveler</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"Our group of 8 had the most memorable trip. The guides were knowledgeable and vehicles top-notch."</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1494790108372-be9c29b29330?w=100" alt="Sarah">
+                    <div>
+                        <h4>Sarah Johnson</h4>
+                        <span>Group Traveler</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"Exceptional service and quality. GetMeYatra made our family vacation truly unforgettable."</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" alt="Mike">
+                    <div>
+                        <h4>Mike Thompson</h4>
+                        <span>Family Traveler</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== SPECIAL OFFERS SECTION ===== -->
+<section class="offers section-padding" id="offers">
+    <div class="container">
+        <div class="offers-content">
+            <span class="section-tag" style="background: rgba(255,255,255,0.1); color: white;">Special Offer</span>
+            <h2>Book Now & Save 20%</h2>
+            <p>Limited time offer! Book any car rental or group tour and get 20% off your first booking. Don't miss out!</p>
+            <a href="/contact" class="btn-secondary btn-large">Claim Offer <i class="fas fa-gift"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA SECTION ===== -->
+<section class="cta-section" id="contact-cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to <span class="gradient-text">Explore?</span></h2>
+            <p>Join thousands of happy travelers who trust GetMeYatra for their journeys.</p>
+            <a href="/contact" class="btn-primary btn-large">Get Started <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+`;
+%>
+<%- include('layout', { title: 'GetMeYatra - Premium Car Rental & Group Tours', content: content }) %>
