@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { colors, breakpoints } from '../styles/theme';
 
 const PageContainer = styled.div`
   padding-top: 0;
-  background: #faf6f0;
+  background: ${colors.background.main};
 `;
 
 // ===== HERO SECTION =====
 const HeroSection = styled.section`
   padding: 160px 0 60px;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
+  background: ${colors.primary.gradient};
   position: relative;
   overflow: hidden;
 
@@ -21,18 +22,7 @@ const HeroSection = styled.section`
     right: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(255, 107, 89, 0.1), transparent);
-    border-radius: 50%;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 179, 71, 0.08), transparent);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
     border-radius: 50%;
   }
 `;
@@ -49,10 +39,10 @@ const HeroContent = styled.div`
 const HeroBadge = styled.span`
   display: inline-block;
   padding: 8px 24px;
-  background: rgba(255, 107, 89, 0.15);
-  border: 1px solid rgba(255, 107, 89, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
-  color: #FF6B59;
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
@@ -68,10 +58,10 @@ const HeroTitle = styled.h1`
   line-height: 1.2;
 
   .highlight {
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 16px;
+    border-radius: 12px;
+    display: inline-block;
   }
 
   @media (max-width: 768px) {
@@ -81,7 +71,7 @@ const HeroTitle = styled.h1`
 
 const HeroSubtitle = styled.p`
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.85);
   max-width: 700px;
   margin: 0 auto;
   line-height: 1.8;
@@ -102,16 +92,16 @@ const Container = styled.div`
 // ===== FILTER SECTION =====
 const FilterSection = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 40px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  background: ${colors.background.card};
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  border: 1px solid ${colors.neutral[100]};
+  margin-bottom: 24px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -121,21 +111,18 @@ const FilterSection = styled.div`
 
 const FilterTitle = styled.span`
   font-weight: 600;
-  color: #2d2d2d;
   font-size: 14px;
+  color: ${colors.neutral[700]};
   display: flex;
   align-items: center;
   gap: 8px;
-
-  i {
-    color: #FF6B59;
-  }
 `;
 
 const FilterGroup = styled.div`
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
 
   @media (max-width: 768px) {
     justify-content: center;
@@ -143,197 +130,178 @@ const FilterGroup = styled.div`
 `;
 
 const FilterButton = styled.button`
-  padding: 8px 20px;
-  border: 2px solid ${({ active }) => active ? '#FF6B59' : '#e8e8e8'};
-  background: ${({ active }) => active ? '#FF6B59' : 'transparent'};
-  color: ${({ active }) => active ? '#fff' : '#6b6b6b'};
+  padding: 6px 16px;
   border-radius: 50px;
+  border: 2px solid ${props => props.active ? colors.primary.main : colors.neutral[200]};
+  background: ${props => props.active ? colors.primary.gradient : 'transparent'};
+  color: ${props => props.active ? '#fff' : colors.neutral[600]};
   font-size: 13px;
-  font-weight: ${({ active }) => active ? '600' : '500'};
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #FF6B59;
-    color: ${({ active }) => active ? '#fff' : '#FF6B59'};
+    transform: translateY(-2px);
+    border-color: ${props => props.active ? colors.primary.main : colors.primary.main};
   }
 `;
 
 const SearchBox = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #f8f8f8;
-  padding: 8px 16px;
+  gap: 8px;
+  background: ${colors.neutral[50]};
   border-radius: 50px;
-  border: 1px solid #e8e8e8;
+  padding: 4px 16px 4px 12px;
+  border: 2px solid ${colors.neutral[200]};
   transition: all 0.3s ease;
 
   &:focus-within {
-    border-color: #FF6B59;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(255, 107, 89, 0.08);
-  }
-
-  i {
-    color: #8a8a8a;
+    border-color: ${colors.primary.main};
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   input {
     border: none;
-    background: transparent;
-    padding: 6px 0;
-    font-size: 14px;
     outline: none;
-    width: 150px;
-    color: #2d2d2d;
+    padding: 8px 0;
+    font-size: 14px;
+    background: transparent;
+    color: ${colors.neutral[700]};
+    min-width: 140px;
 
     &::placeholder {
-      color: #b0b0b0;
+      color: ${colors.neutral[400]};
     }
+  }
+
+  i {
+    color: ${colors.neutral[400]};
   }
 `;
 
 // ===== CAB GRID =====
 const CabGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
   }
 `;
 
-// ===== CAB CARD =====
 const CabCard = styled.div`
-  background: #fff;
-  border-radius: 20px;
+  background: ${colors.background.card};
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  border: 1px solid ${colors.neutral[100]};
+  transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 60px rgba(255, 107, 89, 0.1);
-    border-color: rgba(255, 107, 89, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border-color: ${colors.primary.light};
   }
 `;
 
 const CabImage = styled.div`
-  height: 220px;
-  overflow: hidden;
+  height: 180px;
+  background: ${colors.primary.gradient};
   position: relative;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+  overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: all 0.4s ease;
-  }
-
-  &:hover img {
-    transform: scale(1.05);
   }
 `;
 
 const CabBadge = styled.span`
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: ${({ color }) => color || 'linear-gradient(135deg, #FF6B59, #FFB347)'};
-  color: #fff;
-  padding: 6px 16px;
-  border-radius: 50px;
+  top: 12px;
+  left: 12px;
+  padding: 4px 14px;
+  border-radius: 20px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 700;
   text-transform: uppercase;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  color: #fff;
+  background: ${props => props.color || colors.primary.gradient};
+  letter-spacing: 0.5px;
 `;
 
 const CabSpecial = styled.span`
   position: absolute;
-  top: 16px;
-  left: 16px;
-  background: #FF6B59;
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 50px;
-  font-size: 10px;
+  top: 12px;
+  right: 12px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
-  animation: pulse 2s infinite;
-  box-shadow: 0 4px 15px rgba(255, 107, 89, 0.3);
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
+  background: rgba(251, 191, 36, 0.9);
+  color: #78350F;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 `;
 
 const CabContent = styled.div`
-  padding: 24px;
+  padding: 20px;
 `;
 
 const CabTitle = styled.h3`
-  font-size: 20px;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #2d2d2d;
+  color: ${colors.neutral[900]};
   margin-bottom: 4px;
 `;
 
 const CabSubtitle = styled.p`
-  font-size: 14px;
-  color: #8a8a8a;
+  font-size: 13px;
+  color: ${colors.neutral[500]};
   margin-bottom: 12px;
 `;
 
 const CabSpecs = styled.div`
   display: flex;
   gap: 16px;
-  flex-wrap: wrap;
-  margin: 12px 0 16px;
-  padding: 12px 0;
-  border-top: 1px solid #f5f5f5;
-  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+  color: ${colors.neutral[600]};
+  margin-bottom: 12px;
 
   span {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    color: #6b6b6b;
+  }
 
-    i {
-      color: #FF6B59;
-      font-size: 14px;
-    }
+  i {
+    color: ${colors.primary.main};
   }
 `;
 
 const CabFeatures = styled.div`
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 16px;
 
   span {
-    display: inline-flex;
+    font-size: 12px;
+    color: ${colors.neutral[600]};
+    background: ${colors.neutral[50]};
+    padding: 2px 12px;
+    border-radius: 50px;
+    display: flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 12px;
-    background: #f8f8f8;
-    border-radius: 50px;
-    font-size: 12px;
-    color: #6b6b6b;
 
     i {
-      color: #00BCB4;
-      font-size: 11px;
+      color: ${colors.primary.main};
+      font-size: 10px;
     }
   }
 `;
@@ -342,352 +310,279 @@ const CabFooter = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-
-  @media (max-width: 380px) {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
+  padding-top: 16px;
+  border-top: 1px solid ${colors.neutral[100]};
+  flex-wrap: wrap;
+  gap: 10px;
 `;
 
 const CabPrice = styled.div`
-  display: flex;
-  flex-direction: column;
-
   .amount {
-    font-size: 28px;
+    font-size: 1.3rem;
     font-weight: 800;
-    color: #FF6B59;
-    line-height: 1;
+    color: ${colors.primary.main};
   }
 
   .per-km {
     font-size: 13px;
-    color: #8a8a8a;
+    color: ${colors.neutral[500]};
   }
 
   .min-charge {
+    display: block;
     font-size: 12px;
-    color: #b0b0b0;
+    color: ${colors.neutral[400]};
   }
 `;
 
 const BookBtn = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 28px;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+  padding: 8px 20px;
+  background: ${colors.primary.gradient};
   color: #fff;
+  border: none;
   border-radius: 50px;
-  text-decoration: none;
   font-weight: 600;
   font-size: 14px;
+  text-decoration: none;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(255, 107, 89, 0.3);
-  }
-
-  @media (max-width: 380px) {
-    justify-content: center;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
   }
 `;
 
-// ===== SPECIAL DEMAND SECTION =====
+// ===== SPECIAL SECTION =====
 const SpecialSection = styled.section`
   padding: 60px 0;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 107, 89, 0.08), transparent);
-    top: -100px;
-    right: -100px;
-    border-radius: 50%;
-  }
+  background: ${colors.primary.gradient};
 `;
 
 const SpecialContent = styled.div`
-  position: relative;
-  z-index: 1;
   text-align: center;
+  color: #fff;
 
   h2 {
-    font-size: 38px;
-    font-weight: 900;
-    color: #fff;
-    margin-bottom: 16px;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
 
-    @media (max-width: 768px) {
-      font-size: 28px;
+    span {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 16px;
+      border-radius: 12px;
+      display: inline-block;
     }
   }
 
   p {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    opacity: 0.9;
     max-width: 600px;
-    margin: 0 auto 30px;
-    line-height: 1.6;
+    margin: 0 auto 32px;
+    font-size: 16px;
+    line-height: 1.8;
   }
 `;
 
 const SpecialGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
-  margin-top: 30px;
+  gap: 24px;
 `;
 
 const SpecialCard = styled.div`
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  padding: 30px;
+  padding: 24px;
   text-align: center;
   transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 107, 89, 0.3);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 40px;
     display: block;
+    margin-bottom: 12px;
   }
 
   h4 {
-    font-size: 18px;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #fff;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
 
   p {
+    color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.6;
+    margin-bottom: 8px;
   }
 
   .price {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: #FFB347;
-    margin: 12px 0;
     display: block;
+    margin-bottom: 12px;
   }
 `;
 
 const SpecialBtn = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 32px;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-  color: #fff;
+  display: inline-block;
+  padding: 10px 28px;
+  background: #fff;
+  color: ${colors.primary.main};
   border-radius: 50px;
-  text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  text-decoration: none;
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(255, 107, 89, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 `;
 
-// ===== CTA =====
+// ===== CTA SECTION =====
 const CTASection = styled.section`
   padding: 60px 0;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
-  position: relative;
-  overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: ${colors.background.card};
 `;
 
 const CTAContent = styled.div`
   text-align: center;
-  position: relative;
-  z-index: 1;
 
   h2 {
-    font-size: 32px;
-    font-weight: 900;
-    color: #fff;
+    font-size: 2rem;
+    font-weight: 800;
+    color: ${colors.neutral[900]};
     margin-bottom: 12px;
 
-    @media (max-width: 768px) {
-      font-size: 24px;
+    span {
+      color: ${colors.primary.main};
     }
   }
 
   p {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    color: ${colors.neutral[500]};
     max-width: 600px;
-    margin: 0 auto 20px;
+    margin: 0 auto 24px;
+    font-size: 16px;
+    line-height: 1.8;
   }
 `;
 
 const CTAButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 36px;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+  display: inline-block;
+  padding: 14px 40px;
+  background: ${colors.primary.gradient};
   color: #fff;
   border-radius: 50px;
-  text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
+  text-decoration: none;
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(255, 107, 89, 0.3);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
   }
 `;
 
-// ===== CARS COMPONENT =====
-const Cars = () => {
+// ===== FLOATING WHATSAPP BUTTON =====
+const FloatingWhatsApp = styled.a`
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    background: #25D366;
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+    z-index: 99;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+    }
+`;
+
+// ============================================
+// COMPONENT
+// ============================================
+
+function Cars() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
   const cabData = [
     {
       id: 1,
-      name: "Toyota Crysta",
-      subtitle: "Premium 7-Seater Luxury SUV",
-      image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=500",
-      badge: "Luxury",
-      badgeColor: "linear-gradient(135deg, #FF6B59, #FFB347)",
-      seats: 7,
-      bags: 3,
-      ac: true,
-      features: ["Leather Seats", "Sunroof", "Premium Sound", "Chauffeur"],
-      price: 18,
-      minCharge: 800,
-      category: "luxury",
-      special: false
-    },
-    {
-      id: 2,
-      name: "Maruti Ertiga",
-      subtitle: "Comfortable Family 7-Seater MPV",
-      image: "https://images.unsplash.com/photo-1566473965997-3de9c817e938?w=500",
-      badge: "Family",
-      badgeColor: "linear-gradient(135deg, #00BCB4, #00A8A0)",
-      seats: 7,
-      bags: 3,
-      ac: true,
-      features: ["Spacious", "AC", "Family Friendly", "Economical"],
-      price: 14,
-      minCharge: 600,
-      category: "family",
-      special: false
-    },
-    {
-      id: 3,
-      name: "Honda City",
-      subtitle: "Premium Sedan for Executive Travel",
-      image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500",
-      badge: "Sedan",
-      badgeColor: "linear-gradient(135deg, #FFB347, #FFD93D)",
-      seats: 5,
-      bags: 2,
-      ac: true,
-      features: ["Premium Interior", "Luxury", "Comfort Ride", "Executive"],
-      price: 12,
-      minCharge: 500,
-      category: "sedan",
-      special: false
-    },
-    {
-      id: 4,
-      name: "Toyota Hycross",
-      subtitle: "Premium 7-Seater SUV with Panoramic Roof",
-      image: "https://images.unsplash.com/photo-1550355291-bbee04a4cb7f?w=500",
-      badge: "SUV",
-      badgeColor: "linear-gradient(135deg, #00BCB4, #00D4C0)",
+      name: "Toyota Innova Crysta",
+      subtitle: "Spacious Family SUV with Premium Comfort",
+      image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=500",
+      badge: "Premium",
+      badgeColor: colors.primary.gradient,
       seats: 7,
       bags: 4,
       ac: true,
-      features: ["Panoramic Roof", "Ventilated Seats", "Premium", "SUV"],
-      price: 22,
-      minCharge: 1000,
-      category: "luxury",
-      special: true
+      features: ["Premium", "Spacious", "AC", "Push Back"],
+      price: 20,
+      minCharge: 2800,
+      category: "family"
     },
     {
-      id: 5,
-      name: "Tempo Traveller",
-      subtitle: "12-Seater Group Tour Vehicle",
-      image: "https://images.unsplash.com/photo-1549317661-bf32b8ea0d4e?w=500",
-      badge: "Group",
-      badgeColor: "linear-gradient(135deg, #FF6B59, #EE5A24)",
-      seats: 12,
-      bags: 6,
+      id: 2,
+      name: "Toyota Fortuner",
+      subtitle: "Premium SUV with Power and Style",
+      image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500",
+      badge: "Premium",
+      badgeColor: colors.primary.gradient,
+      seats: 7,
+      bags: 3,
       ac: true,
-      features: ["Spacious", "Group Friendly", "Luggage Space", "Comfort"],
-      price: 28,
-      minCharge: 1500,
-      category: "group",
-      special: false
+      features: ["Premium", "SUV", "4x4", "Luxury"],
+      price: 30,
+      minCharge: 3500,
+      category: "luxury"
     },
     {
-      id: 6,
-      name: "Force Urbania",
-      subtitle: "Premium 9-Seater Luxury Van",
-      image: "https://images.unsplash.com/photo-1549317661-bf32b8ea0d4e?w=500",
-      badge: "Luxury Van",
-      badgeColor: "linear-gradient(135deg, #FF6B59, #FFB347)",
-      seats: 9,
-      bags: 5,
-      ac: true,
-      features: ["Luxury Interior", "Premium", "Spacious", "Comfort"],
-      price: 32,
-      minCharge: 1800,
-      category: "luxury",
-      special: true
-    },
-    {
-      id: 7,
-      name: "Mercedes-Benz S-Class",
-      subtitle: "Ultimate Luxury Sedan for VIP Travel",
+      id: 3,
+      name: "Swift Dzire",
+      subtitle: "Comfortable Sedan for Daily Commute",
       image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=500",
-      badge: "VIP Luxury",
-      badgeColor: "linear-gradient(135deg, #FF6B59, #FFB347)",
+      badge: "Best Seller",
+      badgeColor: "linear-gradient(135deg, #22C55E, #16A34A)",
       seats: 4,
       bags: 2,
       ac: true,
-      features: ["Massage Seats", "Ambient Light", "Premium Sound", "VIP Service"],
-      price: 45,
-      minCharge: 2500,
-      category: "special-demand",
-      special: true,
-      isSpecialDemand: true
+      features: ["AC", "Comfortable", "Fuel Efficient"],
+      price: 11,
+      minCharge: 2000,
+      category: "sedan"
     },
     {
-      id: 8,
-      name: "BMW 7 Series",
+      id: 4,
+      name: "Mercedes Benz E-Class",
       subtitle: "Executive Luxury Sedan with Driver",
       image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500",
       badge: "Executive",
-      badgeColor: "linear-gradient(135deg, #FF6B59, #FFB347)",
+      badgeColor: "linear-gradient(135deg, #8B5CF6, #6D28D9)",
       seats: 4,
       bags: 2,
       ac: true,
@@ -705,7 +600,6 @@ const Cars = () => {
     { id: 'luxury', label: '💎 Luxury' },
     { id: 'family', label: '👨‍👩‍👧‍👦 Family' },
     { id: 'sedan', label: '🚗 Sedan' },
-    { id: 'group', label: '👥 Group' },
     { id: 'special-demand', label: '⭐ Special Demand' }
   ];
 
@@ -735,9 +629,8 @@ const Cars = () => {
       </HeroSection>
 
       {/* ===== CAB CATEGORIES ===== */}
-      <Section bg="#faf6f0">
+      <Section bg={colors.background.main}>
         <Container>
-          {/* Filter Section */}
           <FilterSection>
             <FilterTitle>
               <i className="fas fa-sliders-h"></i> Filter Vehicles
@@ -764,17 +657,15 @@ const Cars = () => {
             </SearchBox>
           </FilterSection>
 
-          {/* Results Count */}
           <div style={{ 
             marginBottom: '20px', 
-            color: '#8a8a8a', 
+            color: colors.neutral[500], 
             fontSize: '14px',
             textAlign: 'center'
           }}>
             Showing {filteredCabs.length} vehicle{filteredCabs.length !== 1 ? 's' : ''}
           </div>
 
-          {/* Cab Grid */}
           <CabGrid>
             {filteredCabs.map((cab) => (
               <CabCard key={cab.id}>
@@ -819,10 +710,10 @@ const Cars = () => {
             <div style={{
               textAlign: 'center',
               padding: '60px 20px',
-              color: '#8a8a8a'
+              color: colors.neutral[500]
             }}>
-              <i className="fas fa-search" style={{ fontSize: '48px', marginBottom: '20px', color: '#FF6B59' }}></i>
-              <h3 style={{ color: '#2d2d2d', marginBottom: '10px' }}>No vehicles found</h3>
+              <i className="fas fa-search" style={{ fontSize: '48px', marginBottom: '20px', color: colors.primary.main }}></i>
+              <h3 style={{ color: colors.neutral[700], marginBottom: '10px' }}>No vehicles found</h3>
               <p>Try adjusting your filters or search terms</p>
             </div>
           )}
@@ -833,7 +724,7 @@ const Cars = () => {
       <SpecialSection>
         <Container>
           <SpecialContent>
-            <h2>⭐ Luxury Vehicles on <span style={{ background: 'linear-gradient(135deg, #FF6B59, #FFB347)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Special Demand</span></h2>
+            <h2>⭐ Luxury Vehicles on <span>Special Demand</span></h2>
             <p>
               Experience the ultimate luxury with our premium vehicles available on special request. 
               Perfect for VIP events, weddings, corporate travel, and special occasions.
@@ -841,7 +732,7 @@ const Cars = () => {
             <SpecialGrid>
               {specialCabs.map((cab) => (
                 <SpecialCard key={cab.id}>
-                  <span className="icon">��</span>
+                  <span className="icon">🚗</span>
                   <h4>{cab.name}</h4>
                   <p>{cab.subtitle}</p>
                   <span className="price">₹{cab.price}/km</span>
@@ -870,7 +761,7 @@ const Cars = () => {
       <CTASection>
         <Container>
           <CTAContent>
-            <h2>Need a <span style={{ background: 'linear-gradient(135deg, #FF6B59, #FFB347)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Custom</span> Vehicle?</h2>
+            <h2>Need a <span>Custom</span> Vehicle?</h2>
             <p>
               Don't see what you're looking for? We have a wide range of vehicles available. 
               Contact us for special requests and custom requirements.
@@ -879,8 +770,17 @@ const Cars = () => {
           </CTAContent>
         </Container>
       </CTASection>
+
+      {/* ===== FLOATING WHATSAPP BUTTON ===== */}
+      <FloatingWhatsApp 
+          href="https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20your%20car%20rentals"
+          target="_blank"
+          rel="noopener noreferrer"
+      >
+          💬
+      </FloatingWhatsApp>
     </PageContainer>
   );
-};
+}
 
 export default Cars;

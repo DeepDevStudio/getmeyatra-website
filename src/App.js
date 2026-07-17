@@ -8,6 +8,12 @@ import Tours from './pages/Tours';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Booking from './pages/Booking';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import YatraDetailsPage from './pages/YatraDetailsPage';
+import BookingDetails from './pages/BookingDetails';
+import ToursDetail from './pages/ToursDetail';
 
 function App() {
   return (
@@ -21,6 +27,12 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/booking" element={<Booking />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/yatra/:id" element={<YatraDetailsPage />} />
+          <Route path="/booking-details/:id" element={<BookingDetails />} />
+          <Route path="/tours/:id" element={<ToursDetail />} />
         </Routes>
         <Footer />
       </div>

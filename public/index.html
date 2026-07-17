@@ -4,8 +4,87 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GetMeYatra - Premium Car Rental & Group Tours</title>
+    
+    <!-- OG Meta Tags for Social Sharing -->
+    <meta property="og:title" content="GetMeYatra - Premium Car Rental & Group Tours" />
+    <meta property="og:description" content="Explore spiritual journeys, hill station retreats, and adventure tours with premium car rentals and expert guides." />
+    <meta property="og:image" content="https://www.getmeyatra.com/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://www.getmeyatra.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="GetMeYatra" />
+    <meta name="twitter:card" content="summary_large_image" />
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Force Google Translate to be visible */
+        #google_translate_element {
+            display: inline-block !important;
+            min-width: 120px;
+        }
+        .goog-te-gadget {
+            display: inline-block !important;
+            font-family: inherit !important;
+        }
+        .goog-te-gadget-simple {
+            display: inline-block !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 50px !important;
+            padding: 4px 12px !important;
+            font-size: 13px !important;
+            color: #fff !important;
+        }
+        .goog-te-gadget .goog-te-combo {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 50px !important;
+            padding: 4px 12px !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+        }
+        .goog-te-gadget .goog-te-combo option {
+            color: #333 !important;
+        }
+        /* Hide Google Translate branding text */
+        .goog-te-gadget span {
+            display: none !important;
+        }
+        .goog-te-gadget .goog-te-combo {
+            display: inline-block !important;
+        }
+        /* Fix for mobile */
+        @media (max-width: 768px) {
+            #google_translate_element {
+                width: 100%;
+                text-align: center;
+            }
+            .goog-te-gadget {
+                width: 100%;
+            }
+            .goog-te-gadget .goog-te-combo {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+    
+    <!-- Google Translate -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'hi,en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
     <div id="root"></div>

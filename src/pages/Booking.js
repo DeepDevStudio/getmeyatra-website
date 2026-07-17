@@ -5,6 +5,53 @@ import styled from 'styled-components';
 import { colors, shadows, breakpoints } from '../styles/theme';
 
 // ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+const formatTime = (time) => {
+    if (!time) return '';
+    const parts = time.split(':');
+    const h = parseInt(parts[0]);
+    const m = parts[1] || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${m} ${ampm}`;
+};
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const formatDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return '';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
+
+// ============================================
+// MANALI PICKUP POINTS
+// ============================================
+const MANALI_PICKUP_POINTS = [
+    'Akshardham Metro Station',
+    'Kashmere Gate Bus Stand',
+    'Tis Hazari Metro Station',
+    'Karol Bagh Metro Station',
+    'Shadipur Metro Station',
+    'Rajouri Garden Metro Station',
+    'Janakpuri East Metro Station',
+    'Peeragarhi Chowk',
+    'Madhuban Chowk',
+    'Karnal Bypass'
+];
+
+// ============================================
 // STYLED COMPONENTS
 // ============================================
 
@@ -77,15 +124,16 @@ const Input = styled.input`
   border-radius: 10px;
   font-size: 14px;
   transition: all 0.3s ease;
+  outline: none;
+  background: #fff;
 
   &:focus {
-    outline: none;
     border-color: ${colors.primary.main};
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   &:disabled {
-    opacity: 0.7;
+    background: ${colors.neutral[50]};
     cursor: not-allowed;
   }
 `;
@@ -96,12 +144,19 @@ const Select = styled.select`
   border: 2px solid ${({ error }) => error ? colors.status.error : colors.neutral[200]};
   border-radius: 10px;
   font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
   background: #fff;
+  appearance: none;
 
   &:focus {
-    outline: none;
     border-color: ${colors.primary.main};
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  &:disabled {
+    background: ${colors.neutral[50]};
+    cursor: not-allowed;
   }
 `;
 
@@ -111,20 +166,21 @@ const TextArea = styled.textarea`
   border: 2px solid ${colors.neutral[200]};
   border-radius: 10px;
   font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
   min-height: 80px;
   resize: vertical;
+  font-family: inherit;
 
   &:focus {
-    outline: none;
     border-color: ${colors.primary.main};
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
-`;
 
-const ErrorText = styled.p`
-  color: ${colors.status.error};
-  font-size: 12px;
-  margin-top: 4px;
+  &:disabled {
+    background: ${colors.neutral[50]};
+    cursor: not-allowed;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -134,54 +190,65 @@ const SubmitButton = styled.button`
   color: #fff;
   border: none;
   border-radius: 10px;
+  font-size: 18px;
   font-weight: 700;
-  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
 
-  &:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
   }
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
-  }
-`;
-
-const SuccessMessage = styled.div`
-  padding: 20px;
-  background: #ECFDF5;
-  border: 1px solid #10B981;
-  border-radius: 10px;
-  text-align: center;
-
-  h3 {
-    color: #065F46;
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-  }
-  p {
-    color: #065F46;
+    transform: none;
   }
 `;
 
 const ErrorMessage = styled.div`
-  padding: 16px;
-  background: #FEF2F2;
-  border: 1px solid ${colors.status.error};
-  border-radius: 10px;
-  color: ${colors.status.error};
+  background: #FEE2E2;
+  color: #DC2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
   margin-bottom: 16px;
+`;
+
+const ErrorText = styled.span`
+  color: ${colors.status.error};
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+`;
+
+const TourImage = styled.div`
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: ${colors.primary.gradient};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #fff;
+  opacity: 0.6;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const SummaryItem = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid ${colors.neutral[200]};
+  padding: 10px 0;
+  border-bottom: 1px solid ${colors.neutral[100]};
 
   &:last-child {
     border-bottom: none;
@@ -189,12 +256,75 @@ const SummaryItem = styled.div`
 
   .label {
     color: ${colors.neutral[600]};
+    font-size: 14px;
   }
+
   .value {
     font-weight: 600;
-    color: ${colors.neutral[900]};
+    color: ${colors.neutral[800]};
+    text-align: right;
+    font-size: 14px;
   }
 `;
+
+// ============================================
+// CUSTOMER FIELDS COMPONENT
+// ============================================
+const CustomerFields = ({ index, customer, onChange, errors, submitting }) => {
+    return (
+        <div style={{ 
+            border: `1px solid ${colors.neutral[200]}`, 
+            borderRadius: '10px', 
+            padding: '16px',
+            marginBottom: '12px',
+            background: colors.neutral[50]
+        }}>
+            <Label style={{ fontSize: '13px', color: colors.primary.main }}>
+                👤 Customer {index + 1}
+            </Label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                    <Label style={{ fontSize: '12px' }}>Name <span className="required">*</span></Label>
+                    <Input
+                        type="text"
+                        name={`customer_${index}_name`}
+                        placeholder="Full name"
+                        value={customer.name}
+                        onChange={(e) => onChange(index, 'name', e.target.value)}
+                        error={errors?.[`customer_${index}_name`]}
+                        disabled={submitting}
+                        style={{ fontSize: '13px', padding: '8px 12px' }}
+                    />
+                </div>
+                <div>
+                    <Label style={{ fontSize: '12px' }}>Phone <span className="required">*</span></Label>
+                    <Input
+                        type="tel"
+                        name={`customer_${index}_phone`}
+                        placeholder="10-digit phone"
+                        value={customer.phone}
+                        onChange={(e) => onChange(index, 'phone', e.target.value)}
+                        error={errors?.[`customer_${index}_phone`]}
+                        disabled={submitting}
+                        style={{ fontSize: '13px', padding: '8px 12px' }}
+                    />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                    <Label style={{ fontSize: '12px' }}>Email</Label>
+                    <Input
+                        type="email"
+                        name={`customer_${index}_email`}
+                        placeholder="Email address"
+                        value={customer.email}
+                        onChange={(e) => onChange(index, 'email', e.target.value)}
+                        disabled={submitting}
+                        style={{ fontSize: '13px', padding: '8px 12px' }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // ============================================
 // COMPONENT
@@ -203,120 +333,251 @@ const SummaryItem = styled.div`
 function Booking() {
     const location = useLocation();
     const navigate = useNavigate();
+    const queryParams = new URLSearchParams(location.search);
+    const yatraId = queryParams.get('yatra');
+
     const [yatra, setYatra] = useState(null);
     const [trips, setTrips] = useState([]);
-    const [selectedTrip, setSelectedTrip] = useState('');
+    const [filteredTrips, setFilteredTrips] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState('');
+
+    // ===== FORM STATE =====
     const [formData, setFormData] = useState({
         customer_name: '',
         phone: '',
         email: '',
+        trip_id: '',
         total_seats: 1,
-        advance_amount: 0,
         pickup_location: '',
-        remarks: ''
+        remarks: '',
+        advance_amount: 0,
     });
+
+    const [selectedTripId, setSelectedTripId] = useState('');
+    const [selectedTrip, setSelectedTrip] = useState(null);
+
+    // ===== MULTI-CUSTOMER STATE =====
+    const [customers, setCustomers] = useState([]);
+
+    // ===== FORM ERRORS =====
     const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [yatraId]);
+
+    useEffect(() => {
+        // Filter trips based on yatra ID
+        if (yatraId && trips.length > 0) {
+            const filtered = trips.filter(trip => trip.yatra_id === parseInt(yatraId));
+            setFilteredTrips(filtered);
+            // Auto-select first trip
+            if (filtered.length > 0) {
+                const firstTrip = filtered[0];
+                setSelectedTripId(firstTrip.id.toString());
+                setSelectedTrip(firstTrip);
+                setFormData(prev => ({ ...prev, trip_id: firstTrip.id }));
+            }
+        } else {
+            setFilteredTrips(trips);
+        }
+    }, [trips, yatraId]);
+
+    useEffect(() => {
+        // Update customer fields when seats change
+        const seatCount = parseInt(formData.total_seats) || 1;
+        const currentCustomers = [...customers];
+        
+        // Add new customers
+        while (currentCustomers.length < seatCount) {
+            currentCustomers.push({ name: '', phone: '', email: '' });
+        }
+        
+        // Remove extra customers
+        while (currentCustomers.length > seatCount) {
+            currentCustomers.pop();
+        }
+        
+        setCustomers(currentCustomers);
+    }, [formData.total_seats]);
 
     const loadData = async () => {
         try {
             setLoading(true);
-            const params = new URLSearchParams(location.search);
-            const yatraId = params.get('yatra');
-            
+            setError('');
+
+            // Load yatra details
             if (yatraId) {
                 const yatraData = await getYatra(yatraId);
                 setYatra(yatraData);
             }
-            
+
+            // Load all trips
             const tripsData = await getTrips();
             setTrips(tripsData);
+
         } catch (err) {
             console.error('Error loading data:', err);
-            setError('Failed to load booking data');
+            setError('Failed to load booking data. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    const validateForm = () => {
-        const errors = {};
-        if (!formData.customer_name.trim()) {
-            errors.customer_name = 'Name is required';
-        }
-        if (!formData.phone.trim()) {
-            errors.phone = 'Phone number is required';
-        } else if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
-            errors.phone = 'Enter a valid 10-digit phone number';
-        }
-        if (!selectedTrip) {
-            errors.trip = 'Please select a trip';
-        }
-        if (formData.total_seats < 1) {
-            errors.total_seats = 'At least 1 seat is required';
-        }
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error when user types
+
         if (formErrors[name]) {
             setFormErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
 
+    const handleTripSelect = (e) => {
+        const tripId = e.target.value;
+        setSelectedTripId(tripId);
+        setFormData(prev => ({ ...prev, trip_id: tripId }));
+
+        const trip = filteredTrips.find(t => t.id === parseInt(tripId));
+        setSelectedTrip(trip);
+
+        if (formErrors.trip_id) {
+            setFormErrors(prev => ({ ...prev, trip_id: '' }));
+        }
+    };
+
+    const handleCustomerChange = (index, field, value) => {
+        const updated = [...customers];
+        updated[index] = { ...updated[index], [field]: value };
+        setCustomers(updated);
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        let isValid = true;
+
+        // Validate main customer
+        if (!formData.customer_name.trim()) {
+            errors.customer_name = 'Full name is required';
+            isValid = false;
+        }
+
+        if (!formData.phone.trim()) {
+            errors.phone = 'Phone number is required';
+            isValid = false;
+        } else if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
+            errors.phone = 'Please enter a valid 10-digit phone number';
+            isValid = false;
+        }
+
+        if (!formData.trip_id) {
+            errors.trip_id = 'Please select a trip';
+            isValid = false;
+        }
+
+        if (!formData.total_seats || formData.total_seats < 1) {
+            errors.total_seats = 'Please select at least 1 seat';
+            isValid = false;
+        }
+
+        // Check seat availability
+        if (selectedTrip && formData.total_seats > (selectedTrip.total_seats || 0)) {
+            errors.total_seats = `Only ${selectedTrip.total_seats} seats available`;
+            isValid = false;
+        }
+
+        // Validate all customers if more than 1 seat
+        if (parseInt(formData.total_seats) > 1) {
+            customers.forEach((customer, index) => {
+                if (!customer.name.trim()) {
+                    errors[`customer_${index}_name`] = 'Name is required';
+                    isValid = false;
+                }
+                if (!customer.phone.trim()) {
+                    errors[`customer_${index}_phone`] = 'Phone is required';
+                    isValid = false;
+                } else if (!/^[0-9]{10}$/.test(customer.phone.trim())) {
+                    errors[`customer_${index}_phone`] = 'Valid 10-digit phone required';
+                    isValid = false;
+                }
+            });
+        }
+
+        setFormErrors(errors);
+        return isValid;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
 
         try {
             setSubmitting(true);
-            setError(null);
-            
+            setError('');
+
+            // Check if main customer exists
+            let customer = null;
+            try {
+                customer = await checkCustomer(formData.phone);
+            } catch (err) {
+                // Customer not found, create new
+            }
+
+            if (!customer || !customer.id) {
+                const newCustomer = await createCustomer({
+                    customer_name: formData.customer_name,
+                    mobile_number: formData.phone,
+                    email: formData.email || '',
+                });
+                customer = newCustomer;
+            }
+
+            // Prepare booking data
             const bookingData = {
+                customer_id: customer.id || customer.customer_id,
                 customer_name: formData.customer_name,
                 phone: formData.phone,
-                email: formData.email,
-                total_seats: formData.total_seats,
-                advance_amount: formData.advance_amount || 0,
-                pickup_location: formData.pickup_location,
-                remarks: formData.remarks,
-                yatra_id: yatra?.id
+                email: formData.email || '',
+                total_seats: parseInt(formData.total_seats),
+                pickup_location: formData.pickup_location || '',
+                notes: formData.remarks || '',
+                advance_amount: parseFloat(formData.advance_amount) || 0,
+                booking_date: new Date().toISOString().split('T')[0],
+                payment_mode: 'Pending',
+                // Additional customers
+                additional_customers: customers.slice(1).filter(c => c.name.trim() || c.phone.trim())
             };
-            
-            const result = await createBooking(selectedTrip, bookingData);
-            setSuccess(true);
-            console.log('Booking successful:', result);
-            
-            setTimeout(() => {
-                navigate('/');
-            }, 5000);
-            
+
+            // Create booking
+            await createBooking(formData.trip_id, bookingData);
+
+            alert('✅ Booking successful! We will contact you shortly.');
+            navigate('/tours');
+
         } catch (err) {
-            console.error('Booking error:', err);
-            setError(err.response?.data?.message || 'Booking failed. Please try again.');
+            console.error('Error creating booking:', err);
+            setError(err.response?.data?.message || 'Failed to create booking. Please try again.');
         } finally {
             setSubmitting(false);
         }
     };
 
+    // Calculate amounts
+    const totalSeats = parseInt(formData.total_seats) || 0;
+    const ratePerSeat = yatra?.rate_per_seat || 0;
+    const totalAmount = ratePerSeat * totalSeats;
+    const advanceAmount = parseFloat(formData.advance_amount) || Math.round(totalAmount * 0.3);
+    const balanceAmount = totalAmount - advanceAmount;
+
     if (loading) {
         return (
             <PageContainer>
-                <div className="container text-center">
+                <div className="container text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
                     <p className="text-gray-500 mt-4">Loading booking details...</p>
                 </div>
@@ -324,26 +585,8 @@ function Booking() {
         );
     }
 
-    if (success) {
-        return (
-            <PageContainer>
-                <div className="container">
-                    <BookingCard>
-                        <SuccessMessage>
-                            <h3>🎉 Booking Confirmed!</h3>
-                            <p>Your booking has been successfully created. We'll contact you shortly.</p>
-                            <button 
-                                className="btn-primary mt-4"
-                                onClick={() => navigate('/')}
-                            >
-                                Return to Home
-                            </button>
-                        </SuccessMessage>
-                    </BookingCard>
-                </div>
-            </PageContainer>
-        );
-    }
+    // Determine if we should show pickup points (Manali)
+    const isManali = yatra?.destination === 'Manali' || yatra?.yatra_name?.toLowerCase().includes('manali');
 
     return (
         <PageContainer>
@@ -404,25 +647,20 @@ function Booking() {
                             <FormGroup>
                                 <Label>Select Trip <span className="required">*</span></Label>
                                 <Select
-                                    name="trip"
-                                    value={selectedTrip}
-                                    onChange={(e) => {
-                                        setSelectedTrip(e.target.value);
-                                        if (formErrors.trip) {
-                                            setFormErrors(prev => ({ ...prev, trip: '' }));
-                                        }
-                                    }}
-                                    error={formErrors.trip}
+                                    name="trip_id"
+                                    value={selectedTripId}
+                                    onChange={handleTripSelect}
+                                    error={formErrors.trip_id}
                                     disabled={submitting}
                                 >
                                     <option value="">Select a trip...</option>
-                                    {trips.map(trip => (
+                                    {filteredTrips.map(trip => (
                                         <option key={trip.id} value={trip.id}>
-                                            {trip.trip_date} - {trip.total_seats || 0} seats available
+                                            {formatDateRange(trip.start_date, trip.end_date)} - {trip.total_seats || 0} seats
                                         </option>
                                     ))}
                                 </Select>
-                                {formErrors.trip && <ErrorText>{formErrors.trip}</ErrorText>}
+                                {formErrors.trip_id && <ErrorText>{formErrors.trip_id}</ErrorText>}
                             </FormGroup>
 
                             <FormGroup>
@@ -440,16 +678,60 @@ function Booking() {
                                 {formErrors.total_seats && <ErrorText>{formErrors.total_seats}</ErrorText>}
                             </FormGroup>
 
+                            {/* Multi-Customer Fields */}
+                            {parseInt(formData.total_seats) > 1 && (
+                                <FormGroup>
+                                    <Label>Additional Customer Details</Label>
+                                    {customers.slice(1).map((customer, index) => (
+                                        <CustomerFields
+                                            key={index}
+                                            index={index + 1}
+                                            customer={customer}
+                                            onChange={handleCustomerChange}
+                                            errors={formErrors}
+                                            submitting={submitting}
+                                        />
+                                    ))}
+                                </FormGroup>
+                            )}
+
                             <FormGroup>
-                                <Label>Pickup Location</Label>
+                                <Label>Advance Amount (₹)</Label>
                                 <Input
-                                    type="text"
-                                    name="pickup_location"
-                                    placeholder="Where should we pick you up?"
-                                    value={formData.pickup_location}
+                                    type="number"
+                                    name="advance_amount"
+                                    min="0"
+                                    value={formData.advance_amount}
                                     onChange={handleChange}
                                     disabled={submitting}
+                                    placeholder={`Recommended: ₹${advanceAmount}`}
                                 />
+                            </FormGroup>
+
+                            <FormGroup>
+                                <Label>Pickup Location</Label>
+                                {isManali ? (
+                                    <Select
+                                        name="pickup_location"
+                                        value={formData.pickup_location}
+                                        onChange={handleChange}
+                                        disabled={submitting}
+                                    >
+                                        <option value="">Select a pickup point...</option>
+                                        {MANALI_PICKUP_POINTS.map((point) => (
+                                            <option key={point} value={point}>{point}</option>
+                                        ))}
+                                    </Select>
+                                ) : (
+                                    <Input
+                                        type="text"
+                                        name="pickup_location"
+                                        placeholder="Where should we pick you up?"
+                                        value={formData.pickup_location}
+                                        onChange={handleChange}
+                                        disabled={submitting}
+                                    />
+                                )}
                             </FormGroup>
 
                             <FormGroup>
@@ -477,32 +759,57 @@ function Booking() {
 
                         {yatra && (
                             <>
+                                {yatra.image_url && (
+                                    <TourImage>
+                                        <img 
+                                            src={'http://getmeyatra.com' + yatra.image_url}
+                                            alt={yatra.yatra_name}
+                                            onError={(e) => { 
+                                                e.target.style.display = 'none'; 
+                                            }}
+                                        />
+                                    </TourImage>
+                                )}
                                 <SummaryItem>
                                     <span className="label">Tour</span>
                                     <span className="value">{yatra.yatra_name}</span>
                                 </SummaryItem>
                                 <SummaryItem>
-                                    <span className="label">Price per seat</span>
-                                    <span className="value">₹{yatra.rate_per_seat}</span>
+                                    <span className="label">Start</span>
+                                    <span className="value">{formatDate(yatra.start_date)} | {yatra.start_time ? formatTime(yatra.start_time) : 'TBD'}</span>
                                 </SummaryItem>
+                                <SummaryItem>
+                                    <span className="label">End</span>
+                                    <span className="value">{formatDate(yatra.end_date)} | {yatra.return_time ? yatra.return_time + ' (Approx)' : 'TBD'}</span>
+                                </SummaryItem>
+                                <SummaryItem>
+                                    <span className="label">Price per seat</span>
+                                    <span className="value">₹{ratePerSeat}</span>
+                                </SummaryItem>
+                                {selectedTrip && (
+                                    <SummaryItem>
+                                        <span className="label">Selected Trip</span>
+                                        <span className="value">{formatDateRange(selectedTrip.start_date, selectedTrip.end_date)}</span>
+                                    </SummaryItem>
+                                )}
                                 <SummaryItem>
                                     <span className="label">Seats selected</span>
-                                    <span className="value">{formData.total_seats}</span>
+                                    <span className="value">{totalSeats}</span>
                                 </SummaryItem>
-                                <SummaryItem>
-                                    <span className="label">Total amount</span>
-                                    <span className="value" style={{ color: colors.primary.main, fontSize: '1.2rem' }}>
-                                        ₹{yatra.rate_per_seat * formData.total_seats}
+                                <SummaryItem style={{ borderBottom: '2px solid ' + colors.primary.main, paddingBottom: '12px' }}>
+                                    <span className="label" style={{ fontWeight: '700', fontSize: '16px' }}>Total amount</span>
+                                    <span className="value" style={{ color: colors.primary.main, fontSize: '1.4rem', fontWeight: '800' }}>
+                                        ₹{totalAmount}
                                     </span>
                                 </SummaryItem>
                                 <SummaryItem>
-                                    <span className="label">Advance payment</span>
-                                    <span className="value">₹{formData.advance_amount || 0}</span>
+                                    <span className="label">Advance payment (30%)</span>
+                                    <span className="value" style={{ color: colors.primary.main, fontWeight: '700' }}>₹{advanceAmount}</span>
                                 </SummaryItem>
                                 <SummaryItem>
                                     <span className="label">Balance amount</span>
-                                    <span className="value" style={{ color: colors.status.error }}>
-                                        ₹{(yatra.rate_per_seat * formData.total_seats) - (formData.advance_amount || 0)}
+                                    <span className="value" style={{ color: colors.status.error, fontWeight: '700', fontSize: '1.1rem' }}>
+                                        ₹{balanceAmount}
                                     </span>
                                 </SummaryItem>
                             </>

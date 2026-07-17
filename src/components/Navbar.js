@@ -89,6 +89,92 @@ const TopBar = styled.div`
   }
 `;
 
+// ===== GOOGLE TRANSLATE STYLED WRAPPER =====
+const TranslateWrapper = styled.div`
+  margin-left: auto;
+  padding: 0 10px;
+  display: flex !important;
+  align-items: center;
+  min-width: 120px;
+
+  #google_translate_element {
+    display: inline-block !important;
+    min-width: 120px;
+  }
+
+  .goog-te-gadget {
+    font-family: inherit !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .goog-te-gadget-simple {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50px !important;
+    padding: 4px 12px !important;
+    font-size: 13px !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .goog-te-gadget-simple .goog-te-menu-value {
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .goog-te-gadget-simple .goog-te-menu-value span {
+    color: #fff !important;
+  }
+
+  .goog-te-gadget .goog-te-combo {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50px !important;
+    padding: 4px 12px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+  }
+
+  .goog-te-gadget .goog-te-combo option {
+    color: #333 !important;
+  }
+
+  .goog-te-gadget span {
+    display: none !important;
+  }
+
+  .goog-te-gadget .goog-te-combo {
+    display: inline-block !important;
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    margin: 0;
+    padding: 5px 0;
+    width: 100%;
+    justify-content: center;
+
+    .goog-te-gadget-simple {
+      background: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    #google_translate_element {
+      width: 100%;
+      text-align: center;
+    }
+
+    .goog-te-gadget .goog-te-combo {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+`;
+
 // ===== MAIN NAV =====
 const MainNav = styled.div`
   padding: ${({ scrolled }) => scrolled ? '8px 0' : '12px 0'};
@@ -105,23 +191,24 @@ const MainNav = styled.div`
   }
 `;
 
+// ===== LOGO WITH IMAGE =====
 const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 24px;
-  font-weight: 800;
   text-decoration: none;
-  color: ${colors.neutral[800]};
   flex-shrink: 0;
 
-  .logo-icon {
-    font-size: 28px;
-    color: ${colors.primary.main};
+  img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
   }
 
   .logo-text {
     .main {
+      font-size: 22px;
+      font-weight: 800;
       background: ${colors.primary.gradient};
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -139,8 +226,12 @@ const Logo = styled(Link)`
   }
 
   @media (max-width: ${breakpoints.sm}) {
-    font-size: 20px;
-    .logo-icon { font-size: 24px; }
+    img {
+      height: 40px;
+    }
+    .logo-text .main {
+      font-size: 18px;
+    }
   }
 `;
 
@@ -227,6 +318,64 @@ const BookButton = styled(Link)`
   }
 `;
 
+// ===== AUTH BUTTONS =====
+const AuthButton = styled(Link)`
+  color: ${({ active }) => active ? colors.primary.main : colors.neutral[700]};
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  padding: 5px 0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: ${({ active }) => active ? '100%' : '0'};
+    height: 2.5px;
+    background: ${colors.primary.gradient};
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+
+  &:hover {
+    color: ${colors.primary.main};
+    &::after { width: 100%; }
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    font-size: 17px;
+    padding: 8px 0;
+    width: 100%;
+    text-align: center;
+  }
+`;
+
+const LogoutButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${colors.neutral[700]};
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px 0;
+  position: relative;
+
+  &:hover {
+    color: ${colors.status.error};
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    font-size: 17px;
+    padding: 8px 0;
+    width: 100%;
+    text-align: center;
+  }
+`;
+
 const Hamburger = styled.div`
   display: none;
   flex-direction: column;
@@ -280,12 +429,25 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const customer = localStorage.getItem('customer');
+    setIsLoggedIn(!!customer);
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('customer');
+    setIsLoggedIn(false);
+    window.location.href = '/';
+  };
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -304,14 +466,20 @@ const Navbar = () => {
             <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
             <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
           </div>
+          <TranslateWrapper>
+            <div id="google_translate_element"></div>
+          </TranslateWrapper>
         </div>
       </TopBar>
 
       <MainNav scrolled={scrolled}>
         <div className="container">
           <Logo to="/" onClick={closeMenu}>
-            <span className="logo-icon">✈️</span>
-            <span className="logo-text">
+            <img src="/images/logo.jpg" alt="GetMeYatra" onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }} />
+            <span className="logo-text" style={{ display: 'flex', flexDirection: 'column' }}>
               <span className="main">GetMeYatra</span>
               <span className="tagline">Premium Tours & Cabs</span>
             </span>
@@ -326,7 +494,19 @@ const Navbar = () => {
             <li><NavLink to="/tours" active={location.pathname === '/tours'} onClick={closeMenu}>Tours</NavLink></li>
             <li><NavLink to="/about" active={location.pathname === '/about'} onClick={closeMenu}>About</NavLink></li>
             <li><NavLink to="/contact" active={location.pathname === '/contact'} onClick={closeMenu}>Contact</NavLink></li>
-            <li><BookButton to="/contact" onClick={closeMenu}>Book Now</BookButton></li>
+            
+            {/* Auth Links */}
+            {isLoggedIn ? (
+              <>
+                <li><AuthButton to="/dashboard" active={location.pathname === '/dashboard'} onClick={closeMenu}>📊 Dashboard</AuthButton></li>
+                <li><LogoutButton onClick={handleLogout}>🚪 Logout</LogoutButton></li>
+              </>
+            ) : (
+              <>
+                <li><AuthButton to="/login" active={location.pathname === '/login'} onClick={closeMenu}>🔑 Login</AuthButton></li>
+                <li><BookButton to="/register" onClick={closeMenu}>Register</BookButton></li>
+              </>
+            )}
           </NavMenu>
         </div>
       </MainNav>

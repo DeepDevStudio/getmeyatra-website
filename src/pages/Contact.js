@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { colors, breakpoints } from '../styles/theme';
 
 const PageContainer = styled.div`
   padding-top: 0;
-  background: #faf6f0;
+  background: ${colors.background.main};
 `;
 
 // ===== HERO SECTION =====
 const HeroSection = styled.section`
   padding: 160px 0 60px;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
+  background: ${colors.primary.gradient};
   position: relative;
   overflow: hidden;
 
@@ -21,7 +22,7 @@ const HeroSection = styled.section`
     right: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(255, 107, 89, 0.1), transparent);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
     border-radius: 50%;
   }
 `;
@@ -38,10 +39,10 @@ const HeroContent = styled.div`
 const HeroBadge = styled.span`
   display: inline-block;
   padding: 8px 24px;
-  background: rgba(255, 107, 89, 0.15);
-  border: 1px solid rgba(255, 107, 89, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
-  color: #FF6B59;
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
@@ -57,10 +58,10 @@ const HeroTitle = styled.h1`
   line-height: 1.2;
 
   .highlight {
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 16px;
+    border-radius: 12px;
+    display: inline-block;
   }
 
   @media (max-width: 768px) {
@@ -70,7 +71,7 @@ const HeroTitle = styled.h1`
 
 const HeroSubtitle = styled.p`
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.85);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.8;
@@ -96,8 +97,8 @@ const SectionHeader = styled.div`
 const SectionTag = styled.span`
   display: inline-block;
   padding: 6px 20px;
-  background: rgba(255, 107, 89, 0.08);
-  color: #FF6B59;
+  background: ${colors.primary.light};
+  color: ${colors.primary.main};
   border-radius: 50px;
   font-size: 13px;
   font-weight: 600;
@@ -110,10 +111,10 @@ const SectionTitle = styled.h2`
   font-size: 38px;
   font-weight: 800;
   margin-bottom: 12px;
-  color: #2d2d2d;
+  color: ${colors.neutral[900]};
 
   .gradient-text {
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+    background: ${colors.primary.gradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -125,7 +126,7 @@ const SectionTitle = styled.h2`
 `;
 
 const SectionSubtitle = styled.p`
-  color: #8a8a8a;
+  color: ${colors.neutral[500]};
   max-width: 600px;
   margin: 0 auto;
   font-size: 16px;
@@ -146,21 +147,21 @@ const ContactGrid = styled.div`
 
 // ===== FORM =====
 const Form = styled.form`
-  background: #fff;
+  background: ${colors.background.card};
   padding: 40px;
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid ${colors.neutral[100]};
 
   h3 {
     font-size: 24px;
     font-weight: 700;
-    color: #2d2d2d;
+    color: ${colors.neutral[900]};
     margin-bottom: 8px;
   }
 
   .subtitle {
-    color: #8a8a8a;
+    color: ${colors.neutral[500]};
     font-size: 14px;
     margin-bottom: 30px;
   }
@@ -174,28 +175,28 @@ const FormGroup = styled.div`
     margin-bottom: 8px;
     font-weight: 600;
     font-size: 14px;
-    color: #2d2d2d;
+    color: ${colors.neutral[700]};
   }
   
   input, textarea, select {
     width: 100%;
     padding: 14px 16px;
-    border: 2px solid #e8e8e8;
+    border: 2px solid ${colors.neutral[200]};
     border-radius: 12px;
     font-size: 15px;
     transition: all 0.3s ease;
-    background: #fafafa;
+    background: ${colors.neutral[50]};
     font-family: inherit;
     
     &:focus {
       outline: none;
-      border-color: #FF6B59;
-      box-shadow: 0 0 0 4px rgba(255, 107, 89, 0.08);
+      border-color: ${colors.primary.main};
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
       background: #fff;
     }
 
     &::placeholder {
-      color: #b0b0b0;
+      color: ${colors.neutral[400]};
     }
   }
 
@@ -218,7 +219,7 @@ const FormRow = styled.div`
 const SubmitButton = styled.button`
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+  background: ${colors.primary.gradient};
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -233,7 +234,7 @@ const SubmitButton = styled.button`
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(255, 107, 89, 0.3);
+    box-shadow: 0 12px 35px rgba(79, 70, 229, 0.3);
   }
 
   &:active {
@@ -249,66 +250,67 @@ const ContactInfo = styled.div`
 `;
 
 const InfoCard = styled.div`
-  background: #fff;
+  background: ${colors.background.card};
   padding: 30px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid ${colors.neutral[100]};
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(255, 107, 89, 0.06);
-    border-color: rgba(255, 107, 89, 0.1);
+    box-shadow: 0 12px 40px rgba(79, 70, 229, 0.06);
+    border-color: ${colors.primary.light};
   }
 
   h4 {
     font-size: 16px;
     font-weight: 700;
-    color: #2d2d2d;
+    color: ${colors.neutral[900]};
     margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
 
     i {
-      color: #FF6B59;
+      color: ${colors.primary.main};
       font-size: 18px;
     }
   }
 
   .item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     padding: 8px 0;
-    color: #6b6b6b;
+    color: ${colors.neutral[600]};
     font-size: 14px;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid ${colors.neutral[100]};
 
     &:last-child {
       border-bottom: none;
     }
 
     i {
-      color: #FF6B59;
+      color: ${colors.primary.main};
       width: 20px;
       font-size: 14px;
+      margin-top: 2px;
     }
 
     a {
-      color: #6b6b6b;
+      color: ${colors.neutral[600]};
       text-decoration: none;
       transition: all 0.3s ease;
 
       &:hover {
-        color: #FF6B59;
+        color: ${colors.primary.main};
       }
     }
 
     .label {
       font-weight: 600;
-      color: #2d2d2d;
+      color: ${colors.neutral[700]};
       min-width: 80px;
     }
   }
@@ -317,7 +319,7 @@ const InfoCard = styled.div`
 // ===== MAP SECTION =====
 const MapSection = styled.section`
   padding: 0 0 80px 0;
-  background: #faf6f0;
+  background: ${colors.background.main};
 `;
 
 const MapContainer = styled.div`
@@ -337,7 +339,7 @@ const MapContainer = styled.div`
 // ===== CTA =====
 const CTASection = styled.section`
   padding: 60px 0;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
+  background: ${colors.primary.gradient};
   position: relative;
   overflow: hidden;
 `;
@@ -360,7 +362,7 @@ const CTAContent = styled.div`
 
   p {
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.85);
     max-width: 600px;
     margin: 0 auto 20px;
   }
@@ -370,19 +372,52 @@ const CTALink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #FF6B59;
+  color: #fff;
   text-decoration: none;
   font-weight: 600;
   font-size: 16px;
   transition: all 0.3s ease;
+  background: rgba(255,255,255,0.2);
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.3);
 
   &:hover {
     gap: 15px;
-    color: #FFB347;
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-3px);
   }
 `;
 
-// ===== CONTACT COMPONENT =====
+// ===== FLOATING WHATSAPP BUTTON =====
+const FloatingWhatsApp = styled.a`
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    background: #25D366;
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+    z-index: 99;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+    }
+`;
+
+// ============================================
+// COMPONENT
+// ============================================
+
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -391,6 +426,7 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -399,10 +435,16 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     alert('🎉 Thank you for your message! We will get back to you within 24 hours.');
     setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    setSubmitting(false);
   };
 
   return (
@@ -422,7 +464,7 @@ const Contact = () => {
       </HeroSection>
 
       {/* ===== CONTACT FORM & INFO ===== */}
-      <Section bg="#faf6f0">
+      <Section bg={colors.background.main}>
         <Container>
           <ContactGrid>
             {/* Contact Form */}
@@ -493,8 +535,8 @@ const Contact = () => {
                 />
               </FormGroup>
 
-              <SubmitButton type="submit">
-                Send Message <i className="fas fa-paper-plane"></i>
+              <SubmitButton type="submit" disabled={submitting}>
+                {submitting ? 'Sending...' : 'Send Message →'}
               </SubmitButton>
             </Form>
 
@@ -512,11 +554,7 @@ const Contact = () => {
                 </div>
                 <div className="item">
                   <i className="fas fa-phone-alt"></i>
-                  <span><span className="label">Landline:</span> 011-47527920</span>
-                </div>
-                <div className="item">
-                  <i className="fas fa-phone-alt"></i>
-                  <span><span className="label">Others:</span> +91 9868304354, +91 9312113322</span>
+                  <span><span className="label">Others:</span> <a href="tel:+919015154545">+91 9015154545</a>, <a href="tel:+919312113322">+91 9312113322</a></span>
                 </div>
               </InfoCard>
 
@@ -524,11 +562,11 @@ const Contact = () => {
                 <h4><i className="fas fa-envelope"></i> Email Us</h4>
                 <div className="item">
                   <i className="fas fa-envelope"></i>
-                  <span><a href="mailto:info@getmecab.com">info@getmecab.com</a></span>
+                  <span><a href="mailto:info@getmeyatra.com">info@getmeyatra.com</a></span>
                 </div>
                 <div className="item">
                   <i className="fas fa-globe"></i>
-                  <span><a href="https://www.getmecab.com" target="_blank" rel="noopener noreferrer">www.getmecab.com</a></span>
+                  <span><a href="https://www.getmeyatra.com" target="_blank" rel="noopener noreferrer">www.getmeyatra.com</a></span>
                 </div>
               </InfoCard>
 
@@ -590,12 +628,21 @@ const Contact = () => {
       <CTASection>
         <Container>
           <CTAContent>
-            <h2>Ready to Plan Your <span style={{ background: 'linear-gradient(135deg, #FF6B59, #FFB347)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Next Journey?</span></h2>
+            <h2>Ready to Plan Your <span style={{ background: 'rgba(255,255,255,0.2)', padding: '4px 16px', borderRadius: '12px' }}>Next Journey?</span></h2>
             <p>Let us help you create unforgettable memories. Book your tour or cab today!</p>
-            <CTALink to="/tours">Explore Our Tours <i className="fas fa-arrow-right"></i></CTALink>
+            <CTALink to="/tours">Explore Our Tours →</CTALink>
           </CTAContent>
         </Container>
       </CTASection>
+
+      {/* ===== FLOATING WHATSAPP BUTTON ===== */}
+      <FloatingWhatsApp 
+          href="https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20your%20tours"
+          target="_blank"
+          rel="noopener noreferrer"
+      >
+          💬
+      </FloatingWhatsApp>
     </PageContainer>
   );
 };

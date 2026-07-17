@@ -1,100 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { getYatras } from '../services/api';
+import { colors, shadows, breakpoints } from '../styles/theme';
+
+// ============================================
+// STYLED COMPONENTS
+// ============================================
 
 const PageContainer = styled.div`
-  padding-top: 0;
-  background: #faf6f0;
-`;
-
-// ===== HERO SECTION =====
-const HeroSection = styled.section`
-  padding: 160px 0 80px;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(255, 107, 89, 0.1), transparent);
-    border-radius: 50%;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 179, 71, 0.08), transparent);
-    border-radius: 50%;
-  }
-`;
-
-const HeroContent = styled.div`
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  text-align: center;
-`;
-
-const HeroBadge = styled.span`
-  display: inline-block;
-  padding: 8px 24px;
-  background: rgba(255, 107, 89, 0.15);
-  border: 1px solid rgba(255, 107, 89, 0.2);
-  border-radius: 50px;
-  color: #FF6B59;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-`;
-
-const HeroTitle = styled.h1`
-  font-size: 52px;
-  font-weight: 900;
-  color: #fff;
-  margin-bottom: 20px;
-  line-height: 1.2;
-
-  .highlight {
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 36px;
-  }
-`;
-
-const HeroSubtitle = styled.p`
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
-  max-width: 700px;
-  margin: 0 auto;
-  line-height: 1.8;
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-  }
-`;
-
-// ===== SECTION COMPONENTS =====
-const Section = styled.section`
-  padding: 80px 0;
-  background: ${({ bg }) => bg || '#fff'};
+  padding-top: 160px;
+  padding-bottom: 60px;
+  background: ${colors.background.main};
+  min-height: 100vh;
 `;
 
 const Container = styled.div`
@@ -103,84 +21,96 @@ const Container = styled.div`
   padding: 0 20px;
 `;
 
-const SectionHeader = styled.div`
+// ===== HERO SECTION =====
+const HeroSection = styled.div`
+  background: ${colors.primary.gradient};
+  border-radius: 16px;
+  padding: 60px 40px;
+  color: #fff;
   text-align: center;
-  margin-bottom: 50px;
-`;
+  margin-bottom: 60px;
 
-const SectionTag = styled.span`
-  display: inline-block;
-  padding: 6px 20px;
-  background: rgba(255, 107, 89, 0.08);
-  color: #FF6B59;
-  border-radius: 50px;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 38px;
-  font-weight: 800;
-  margin-bottom: 12px;
-  color: #2d2d2d;
-
-  .gradient-text {
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 28px;
-  }
-`;
-
-const SectionSubtitle = styled.p`
-  color: #8a8a8a;
-  max-width: 600px;
-  margin: 0 auto;
-  font-size: 16px;
-  line-height: 1.6;
-`;
-
-// ===== ABOUT STORY =====
-const StoryGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-`;
-
-const StoryImage = styled.div`
-  img {
-    width: 100%;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const StoryContent = styled.div`
-  h3 {
-    font-size: 28px;
-    font-weight: 800;
-    color: #2d2d2d;
+  h1 {
+    font-size: 3rem;
+    font-weight: 900;
     margin-bottom: 16px;
   }
 
   p {
-    color: #6b6b6b;
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
     line-height: 1.8;
-    margin-bottom: 16px;
-    font-size: 15px;
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    padding: 40px 20px;
+    h1 {
+      font-size: 2.2rem;
+    }
+  }
+`;
+
+// ===== SECTION =====
+const Section = styled.div`
+  margin-bottom: 60px;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: ${colors.neutral[900]};
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: ${colors.neutral[600]};
+    font-size: 1.1rem;
+    margin-bottom: 32px;
+  }
+
+  .gradient-text {
+    background: ${colors.primary.gradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+`;
+
+// ===== OUR STORY =====
+const StoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+
+  .story-text {
+    p {
+      color: ${colors.neutral[600]};
+      line-height: 1.8;
+      margin-bottom: 16px;
+      font-size: 1.05rem;
+    }
+  }
+
+  .story-image {
+    background: ${colors.primary.gradient};
+    border-radius: 16px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    color: #fff;
+    opacity: 0.7;
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    grid-template-columns: 1fr;
+    .story-image {
+      height: 200px;
+      order: -1;
+    }
   }
 `;
 
@@ -188,423 +118,409 @@ const StoryContent = styled.div`
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 20px;
 
-  @media (max-width: 768px) {
+  .stat-card {
+    background: ${colors.background.card};
+    padding: 30px 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: ${shadows.sm};
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: ${shadows.lg};
+    }
+
+    .number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: ${colors.primary.main};
+      display: block;
+    }
+
+    .label {
+      color: ${colors.neutral[600]};
+      font-size: 14px;
+      margin-top: 4px;
+    }
+  }
+
+  @media (max-width: ${breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
-const StatCard = styled.div`
-  background: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(255, 107, 89, 0.08);
-    border-color: rgba(255, 107, 89, 0.15);
-  }
-
-  .number {
-    font-size: 42px;
-    font-weight: 900;
-    color: #FF6B59;
-    display: block;
-  }
-
-  .label {
-    font-size: 14px;
-    color: #8a8a8a;
-    margin-top: 8px;
-    display: block;
-  }
-`;
-
-// ===== MISSION VISION =====
-const MissionGrid = styled.div`
+// ===== WHY CHOOSE US =====
+const WhyGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 24px;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
+  .why-card {
+    background: ${colors.background.card};
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: ${shadows.sm};
+    transition: all 0.3s ease;
+    text-align: center;
 
-const MissionCard = styled.div`
-  background: #fff;
-  padding: 40px 30px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: ${shadows.lg};
+    }
 
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(255, 107, 89, 0.08);
-  }
-
-  .icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    display: block;
-  }
-
-  h4 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2d2d2d;
-    margin-bottom: 10px;
-  }
-
-  p {
-    color: #8a8a8a;
-    line-height: 1.7;
-    font-size: 14px;
-  }
-`;
-
-// ===== TEAM =====
-const TeamGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-`;
-
-const TeamCard = styled.div`
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
-  text-align: center;
-
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(255, 107, 89, 0.08);
-  }
-
-  .image {
-    height: 220px;
-    background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 72px;
-    color: rgba(255, 255, 255, 0.3);
-  }
-
-  .info {
-    padding: 20px;
+    .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
 
     h4 {
-      font-size: 18px;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #2d2d2d;
-      margin-bottom: 4px;
+      color: ${colors.neutral[900]};
+      margin-bottom: 8px;
     }
 
     p {
+      color: ${colors.neutral[600]};
       font-size: 14px;
-      color: #8a8a8a;
+      line-height: 1.6;
+    }
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: ${breakpoints.sm}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+// ===== TEAM SECTION =====
+const TeamGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+
+  .team-card {
+    background: ${colors.background.card};
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: ${shadows.sm};
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: ${shadows.lg};
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: ${colors.primary.gradient};
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #fff;
+    }
+
+    .name {
+      font-weight: 700;
+      color: ${colors.neutral[900]};
+      font-size: 1rem;
+    }
+
+    .role {
+      color: ${colors.neutral[500]};
+      font-size: 13px;
     }
   }
 `;
 
-// ===== VALUES =====
-const ValuesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 24px;
-`;
-
-const ValueCard = styled.div`
-  background: #fff;
-  padding: 30px 20px;
+// ===== CTA SECTION =====
+const CTASection = styled.div`
+  background: ${colors.primary.gradient};
   border-radius: 16px;
+  padding: 50px 40px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(255, 107, 89, 0.08);
-  }
-
-  .icon {
-    font-size: 36px;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  h4 {
-    font-size: 16px;
-    font-weight: 700;
-    color: #2d2d2d;
-    margin-bottom: 6px;
-  }
-
-  p {
-    font-size: 13px;
-    color: #8a8a8a;
-    line-height: 1.5;
-  }
-`;
-
-// ===== CTA =====
-const CTASection = styled.section`
-  padding: 80px 0;
-  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255, 107, 89, 0.08), transparent);
-    top: -100px;
-    right: -100px;
-    border-radius: 50%;
-  }
-`;
-
-const CTAContent = styled.div`
-  text-align: center;
-  position: relative;
-  z-index: 1;
+  color: #fff;
 
   h2 {
-    font-size: 38px;
-    font-weight: 900;
-    color: #fff;
-    margin-bottom: 16px;
-
-    @media (max-width: 768px) {
-      font-size: 28px;
-    }
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
   }
 
   p {
+    opacity: 0.9;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    padding: 14px 40px;
+    background: #fff;
+    color: ${colors.primary.main};
+    border-radius: 50px;
+    font-weight: 700;
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
-    max-width: 600px;
-    margin: 0 auto 30px;
-    line-height: 1.6;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    padding: 30px 20px;
+    h2 {
+      font-size: 1.5rem;
+    }
   }
 `;
 
-const CTAButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 40px;
-  background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
-  color: #fff;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 16px;
-  transition: all 0.3s ease;
+// ============================================
+// NEW: FLOATING WHATSAPP BUTTON
+// ============================================
+const FloatingWhatsApp = styled.a`
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    background: #25D366;
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+    z-index: 99;
+    transition: all 0.3s ease;
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(255, 107, 89, 0.3);
-  }
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+    }
 `;
 
-// ===== ABOUT COMPONENT =====
-const About = () => {
+// ============================================
+// COMPONENT
+// ============================================
+
+function About() {
+  const [stats, setStats] = useState({
+    travelers: '1000+',
+    destinations: '50+',
+    customized: '100%',
+    satisfaction: '98%'
+  });
+
+  useEffect(() => {
+    // Fetch real stats from API
+    const fetchStats = async () => {
+      try {
+        const data = await getYatras();
+        if (data && data.length > 0) {
+          // Calculate real stats
+          const totalTours = data.length;
+          const uniqueDestinations = new Set(data.map(y => {
+            const name = y.yatra_name || '';
+            if (name.includes('Vrindavan')) return 'Vrindavan';
+            if (name.includes('Barsana')) return 'Barsana';
+            if (name.includes('Khatu Shyam')) return 'Khatu Shyam';
+            if (name.includes('Manali')) return 'Manali';
+            if (name.includes('Haridwar')) return 'Haridwar';
+            if (name.includes('Rishikesh')) return 'Rishikesh';
+            if (name.includes('Ayodhya')) return 'Ayodhya';
+            return null;
+          }).filter(Boolean)).size;
+
+          // Get total seats from all tours
+          let totalSeats = 0;
+          data.forEach(y => {
+            totalSeats += y.total_seats || 0;
+          });
+
+          setStats({
+            travelers: `${totalSeats || 1000}+`,
+            destinations: `${uniqueDestinations || 50}+`,
+            customized: '100%',
+            satisfaction: '98%'
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Team members
+  const team = [
+    { name: 'Sanjeev', role: 'Co-Founder & CEO', emoji: '👨‍💼' },
+    { name: 'Rajeev', role: 'Co-Founder & Director', emoji: '👨‍💼' },
+    { name: 'Hritik', role: 'Senior Developer', emoji: '👨‍💻' },
+    { name: 'Deepanshu', role: 'Developer', emoji: '🧑‍💻' },
+    { name: 'Dev', role: 'Team Member', emoji: '👨‍💻' },
+    { name: 'Muskan', role: 'Team Member', emoji: '👩‍💼' },
+    { name: 'Riya', role: 'Team Member', emoji: '👩‍💼' },
+  ];
+
   return (
     <PageContainer>
-      {/* ===== HERO SECTION ===== */}
-      <HeroSection>
-        <HeroContent>
-          <HeroBadge>About GetMeYatra</HeroBadge>
-          <HeroTitle>
-            Your Trusted <span className="highlight">Travel Partner</span> <br />
-            Across India
-          </HeroTitle>
-          <HeroSubtitle>
-            We are a premier pan-India tour and cab service provider dedicated to making your 
-            travel experiences unforgettable with premium vehicles and expert guidance.
-          </HeroSubtitle>
-        </HeroContent>
-      </HeroSection>
+      <Container>
+        {/* Hero Section */}
+        <HeroSection>
+          <h1>🙏 About GetMeYatra</h1>
+          <p>
+            Your trusted travel partner for spiritual journeys, hill station retreats,
+            and adventure tours across India. We believe in creating memorable experiences
+            that connect you with the divine and scenic beauty of our country.
+          </p>
+        </HeroSection>
 
-      {/* ===== OUR STORY ===== */}
-      <Section bg="#ffffff">
-        <Container>
-          <SectionHeader>
-            <SectionTag>Our Story</SectionTag>
-            <SectionTitle>Journey of <span className="gradient-text">GetMeYatra</span></SectionTitle>
-            <SectionSubtitle>From a small vision to a trusted pan-India travel partner.</SectionSubtitle>
-          </SectionHeader>
+        {/* Our Story */}
+        <Section>
           <StoryGrid>
-            <StoryImage>
-              <img 
-                src="https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=600" 
-                alt="Our Journey" 
-              />
-            </StoryImage>
-            <StoryContent>
-              <h3>Your Journey, Our <span style={{ background: 'linear-gradient(135deg, #FF6B59, #FFB347)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Passion</span></h3>
+            <div className="story-text">
+              <h2>Our <span className="gradient-text">Story</span></h2>
+              <p className="subtitle">From a small dream to a trusted travel partner</p>
               <p>
-                GetMeYatra was founded with a simple yet powerful vision: to make travel accessible, 
-                enjoyable, and memorable for everyone. What started as a small cab service has now 
-                grown into a comprehensive travel solution provider across India.
+                GetMeYatra was born from a simple idea - to make spiritual and adventure
+                travel accessible, comfortable, and memorable for everyone. Starting with
+                a single vehicle and a passion for travel, we've grown into a trusted
+                name in pan-India tour and cab services.
               </p>
               <p>
-                From the spiritual lands of Vrindavan, Haridwar, and Rishikesh to the scenic beauty 
-                of Manali, Kasol, and beyond, we've been privileged to be a part of countless 
-                unforgettable journeys.
+                Today, we're proud to serve thousands of happy travelers, offering
+                curated experiences that combine comfort, safety, and spiritual
+                fulfillment. Our team of dedicated professionals ensures every journey
+                is as special as the destination itself.
               </p>
-              <p>
-                Today, with a fleet of premium vehicles and a team of dedicated professionals, 
-                we continue to serve thousands of happy travelers across the country.
-              </p>
-            </StoryContent>
+            </div>
+            <div className="story-image">🚐</div>
           </StoryGrid>
-        </Container>
-      </Section>
+        </Section>
 
-      {/* ===== STATS ===== */}
-      <Section bg="#faf6f0">
-        <Container>
-          <SectionHeader>
-            <SectionTag>Our Numbers</SectionTag>
-            <SectionTitle>GetMeYatra by <span className="gradient-text">the Numbers</span></SectionTitle>
-            <SectionSubtitle>Our growth and reach in the travel industry.</SectionSubtitle>
-          </SectionHeader>
+        {/* Stats */}
+        <Section>
+          <h2 style={{ textAlign: 'center' }}>Our <span className="gradient-text">Impact</span></h2>
+          <p className="subtitle" style={{ textAlign: 'center' }}>
+            Numbers that tell our story
+          </p>
           <StatsGrid>
-            <StatCard>
-              <span className="number">5000+</span>
+            <div className="stat-card">
+              <span className="number">{stats.travelers}</span>
               <span className="label">Happy Travelers</span>
-            </StatCard>
-            <StatCard>
-              <span className="number">50+</span>
+            </div>
+            <div className="stat-card">
+              <span className="number">{stats.destinations}</span>
               <span className="label">Destinations</span>
-            </StatCard>
-            <StatCard>
-              <span className="number">200+</span>
-              <span className="label">Premium Vehicles</span>
-            </StatCard>
-            <StatCard>
-              <span className="number">98%</span>
+            </div>
+            <div className="stat-card">
+              <span className="number">{stats.customized}</span>
+              <span className="label">Customized Tours</span>
+            </div>
+            <div className="stat-card">
+              <span className="number">{stats.satisfaction}</span>
               <span className="label">Satisfaction Rate</span>
-            </StatCard>
+            </div>
           </StatsGrid>
-        </Container>
-      </Section>
+        </Section>
 
-      {/* ===== MISSION & VISION ===== */}
-      <Section bg="#ffffff">
-        <Container>
-          <SectionHeader>
-            <SectionTag>Mission & Vision</SectionTag>
-            <SectionTitle>Our <span className="gradient-text">Purpose</span></SectionTitle>
-            <SectionSubtitle>Driven by passion, guided by purpose.</SectionSubtitle>
-          </SectionHeader>
-          <MissionGrid>
-            <MissionCard>
-              <span className="icon">🎯</span>
-              <h4>Our Mission</h4>
-              <p>
-                To provide exceptional travel experiences through premium vehicle rentals 
-                and curated tours, making every journey comfortable, safe, and memorable.
-              </p>
-            </MissionCard>
-            <MissionCard>
-              <span className="icon">👁️</span>
-              <h4>Our Vision</h4>
-              <p>
-                To become India's most trusted travel partner, connecting people with the 
-                divine and scenic beauty of the country through unparalleled service.
-              </p>
-            </MissionCard>
-            <MissionCard>
-              <span className="icon">💎</span>
-              <h4>Our Values</h4>
-              <p>
-                Integrity, excellence, and customer-centricity are at the core of everything 
-                we do. We believe in building lasting relationships through trust and quality.
-              </p>
-            </MissionCard>
-          </MissionGrid>
-        </Container>
-      </Section>
-
-      {/* ===== OUR VALUES ===== */}
-      <Section bg="#faf6f0">
-        <Container>
-          <SectionHeader>
-            <SectionTag>Core Values</SectionTag>
-            <SectionTitle>What <span className="gradient-text">Drives Us</span></SectionTitle>
-            <SectionSubtitle>The principles that guide our every action.</SectionSubtitle>
-          </SectionHeader>
-          <ValuesGrid>
-            <ValueCard>
-              <span className="icon">🙏</span>
-              <h4>Spiritual Connection</h4>
-              <p>Deep understanding of pilgrimage routes and sacred traditions.</p>
-            </ValueCard>
-            <ValueCard>
-              <span className="icon">🚗</span>
-              <h4>Premium Quality</h4>
-              <p>Well-maintained vehicles and professional drivers for your safety.</p>
-            </ValueCard>
-            <ValueCard>
-              <span className="icon">💝</span>
-              <h4>Customer First</h4>
-              <p>Personalized attention and care from booking to drop-off.</p>
-            </ValueCard>
-            <ValueCard>
-              <span className="icon">🌏</span>
-              <h4>Pan India Reach</h4>
-              <p>Extensive network across major cities and tourist destinations.</p>
-            </ValueCard>
-            <ValueCard>
-              <span className="icon">💰</span>
-              <h4>Transparent Pricing</h4>
-              <p>No hidden charges, competitive rates, and best price guarantee.</p>
-            </ValueCard>
-            <ValueCard>
-              <span className="icon">🛡️</span>
+        {/* Why Choose Us */}
+        <Section>
+          <h2 style={{ textAlign: 'center' }}>Why <span className="gradient-text">Choose Us</span></h2>
+          <p className="subtitle" style={{ textAlign: 'center' }}>
+            What makes us different
+          </p>
+          <WhyGrid>
+            <div className="why-card">
+              <div className="icon">🙏</div>
+              <h4>Spiritual Expertise</h4>
+              <p>Deep knowledge of pilgrimage routes and sacred traditions across India.</p>
+            </div>
+            <div className="why-card">
+              <div className="icon">🚗</div>
+              <h4>Premium Fleet</h4>
+              <p>Wide range of vehicles from sedans to luxury vans for every group size.</p>
+            </div>
+            <div className="why-card">
+              <div className="icon">💰</div>
+              <h4>Best Price Guarantee</h4>
+              <p>Competitive pricing with transparent billing and no hidden charges.</p>
+            </div>
+            <div className="why-card">
+              <div className="icon">⭐</div>
+              <h4>5-Star Service</h4>
+              <p>Personalized attention and exceptional customer care from booking to return.</p>
+            </div>
+            <div className="why-card">
+              <div className="icon">🌏</div>
+              <h4>Pan India Network</h4>
+              <p>Extensive presence across major cities and tourist destinations in India.</p>
+            </div>
+            <div className="why-card">
+              <div className="icon">🛡️</div>
               <h4>Safety First</h4>
-              <p>Regularly sanitized vehicles and trained drivers for your safety.</p>
-            </ValueCard>
-          </ValuesGrid>
-        </Container>
-      </Section>
+              <p>Regularly maintained vehicles and trained drivers for your safety.</p>
+            </div>
+          </WhyGrid>
+        </Section>
 
-      {/* ===== CTA SECTION ===== */}
-      <CTASection>
-        <Container>
-          <CTAContent>
-            <h2>Ready to <span style={{ background: 'linear-gradient(135deg, #FF6B59, #FFB347)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Explore</span> with Us?</h2>
-            <p>
-              Join thousands of happy travelers who trust GetMeYatra for their journeys. 
-              Let's create unforgettable memories together.
-            </p>
-            <CTAButton to="/contact">Get Started <i className="fas fa-arrow-right"></i></CTAButton>
-          </CTAContent>
-        </Container>
-      </CTASection>
+        {/* Team */}
+        <Section>
+          <h2 style={{ textAlign: 'center' }}>Our <span className="gradient-text">Team</span></h2>
+          <p className="subtitle" style={{ textAlign: 'center' }}>
+            The people behind your journeys
+          </p>
+          <TeamGrid>
+            {team.map((member, index) => (
+              <div className="team-card" key={index}>
+                <div className="avatar">{member.emoji}</div>
+                <div className="name">{member.name}</div>
+                <div className="role">{member.role}</div>
+              </div>
+            ))}
+          </TeamGrid>
+        </Section>
+
+        {/* CTA */}
+        <CTASection>
+          <h2>Ready for Your Next Journey?</h2>
+          <p>
+            Experience the divine and scenic beauty of India with GetMeYatra.
+            Book your spiritual or adventure tour today!
+          </p>
+          <Link to="/tours" className="cta-btn">
+            Explore Tours →
+          </Link>
+        </CTASection>
+      </Container>
+
+      {/* ===== FLOATING WHATSAPP BUTTON ===== */}
+      <FloatingWhatsApp 
+          href="https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20your%20tours"
+          target="_blank"
+          rel="noopener noreferrer"
+      >
+          💬
+      </FloatingWhatsApp>
     </PageContainer>
   );
-};
+}
 
 export default About;

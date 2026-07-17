@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { colors, breakpoints } from '../styles/theme';
 
 const FooterContainer = styled.footer`
   background: #1a1a2e;
@@ -36,9 +37,12 @@ const FooterSection = styled.div`
 
   h3 {
     font-size: 22px;
-    i {
-      color: #FF6B59;
-      margin-right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .logo-icon {
+      font-size: 28px;
     }
   }
 
@@ -67,7 +71,7 @@ const FooterSection = styled.div`
       
       i {
         width: 20px;
-        color: #FF6B59;
+        color: ${colors.primary.light};
         font-size: 14px;
         margin-top: 3px;
       }
@@ -78,7 +82,7 @@ const FooterSection = styled.div`
         transition: all 0.3s ease;
         
         &:hover {
-          color: #FF6B59;
+          color: ${colors.primary.light};
         }
       }
 
@@ -109,33 +113,8 @@ const SocialLinks = styled.div`
     transition: all 0.3s ease;
     
     &:hover {
-      background: linear-gradient(135deg, #FF6B59 0%, #FFB347 100%);
+      background: ${colors.primary.gradient};
       transform: translateY(-3px);
-    }
-  }
-`;
-
-const ContactItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
-
-  i {
-    color: #FF6B59;
-    font-size: 16px;
-    margin-top: 3px;
-    min-width: 20px;
-  }
-
-  .content {
-    line-height: 1.6;
-    
-    .number {
-      display: block;
-      color: rgba(255, 255, 255, 0.8);
     }
   }
 `;
@@ -169,6 +148,8 @@ const BottomLinks = styled.div`
   display: flex;
   gap: 20px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
 
   a {
     color: rgba(255, 255, 255, 0.4);
@@ -177,40 +158,46 @@ const BottomLinks = styled.div`
     font-size: 13px;
 
     &:hover {
-      color: #FF6B59;
+      color: ${colors.primary.light};
     }
   }
 
   span {
     color: rgba(255, 255, 255, 0.2);
   }
+
+  .divider {
+    color: rgba(255, 255, 255, 0.15);
+  }
 `;
 
 const Footer = () => {
-  const handleNewsletter = (e) => {
-    e.preventDefault();
-    alert('🎉 Thank you for subscribing!');
-    e.target.reset();
-  };
-
   return (
     <FooterContainer>
       <FooterWrapper>
         <FooterTop>
           {/* Company Info */}
           <FooterSection>
-            <h3><i className="fas fa-compass"></i> GetMeYatra</h3>
+            <h3>
+              <span className="logo-icon">🚐</span>
+              GetMeYatra
+            </h3>
             <p>
               Your trusted partner for car rentals and group tours across India. 
               Experience spiritual journeys, hill station retreats, and adventure 
               tours with premium vehicles and expert guides.
             </p>
             <SocialLinks>
-              <a href="#"><i className="fab fa-facebook-f"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-youtube"></i></a>
-              <a href="https://wa.me/918010320000" target="_blank" rel="noopener noreferrer">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <i className="fab fa-youtube"></i>
+              </a>
+              <a href="https://wa.me/918010320000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                 <i className="fab fa-whatsapp"></i>
               </a>
             </SocialLinks>
@@ -220,11 +207,11 @@ const Footer = () => {
           <FooterSection>
             <h4>Quick Links</h4>
             <ul>
+              <li><Link to="/"><i className="fas fa-chevron-right"></i> Home</Link></li>
               <li><Link to="/cars"><i className="fas fa-chevron-right"></i> Car Rentals</Link></li>
-              <li><Link to="/tours"><i className="fas fa-chevron-right"></i> Group Tours</Link></li>
+              <li><Link to="/tours"><i className="fas fa-chevron-right"></i> Tours</Link></li>
               <li><Link to="/about"><i className="fas fa-chevron-right"></i> About Us</Link></li>
               <li><Link to="/contact"><i className="fas fa-chevron-right"></i> Contact</Link></li>
-              <li><Link to="/contact"><i className="fas fa-chevron-right"></i> Book Now</Link></li>
             </ul>
           </FooterSection>
 
@@ -250,21 +237,14 @@ const Footer = () => {
                 <i className="fas fa-phone-alt"></i>
                 <div>
                   <span className="label">Others:</span>
-                  <span>+91 9868304354, +91 9312113322</span>
-                </div>
-              </li>
-              <li>
-                <i className="fas fa-phone-alt"></i>
-                <div>
-                  <span className="label">Landline:</span>
-                  <span>011-47527920</span>
+                  <a href="tel:+919015154545">+91 9015154545</a>, <a href="tel:+919312113322">+91 9312113322</a>
                 </div>
               </li>
               <li>
                 <i className="fas fa-envelope"></i>
                 <div>
                   <span className="label">Email:</span>
-                  <a href="mailto:info@getmecab.com">info@getmecab.com</a>
+                  <a href="mailto:info@getmeyatra.com">info@getmeyatra.com</a>
                 </div>
               </li>
             </ul>
@@ -297,17 +277,17 @@ const Footer = () => {
       <FooterBottom>
         <BottomWrapper>
           <div>
-            &copy; 2024 GetMeYatra. All rights reserved.
+            &copy; 2025 GetMeYatra. All rights reserved.
           </div>
           <BottomLinks>
             <span><i className="fas fa-id-card"></i> GST: 07AABCU3052C1ZT</span>
-            <span>|</span>
+            <span className="divider">|</span>
             <span><i className="fas fa-building"></i> CIN: U49210DL2011PTC337212</span>
-            <span>|</span>
+            <span className="divider">|</span>
             <span><i className="fas fa-file-invoice"></i> PAN: AABCU3052C</span>
-            <span>|</span>
-            <a href="https://www.getmecab.com" target="_blank" rel="noopener noreferrer">
-              <i className="fas fa-globe"></i> getmecab.com
+            <span className="divider">|</span>
+            <a href="https://www.getmeyatra.com" target="_blank" rel="noopener noreferrer">
+              <i className="fas fa-globe"></i> getmeyatra.com
             </a>
           </BottomLinks>
         </BottomWrapper>
