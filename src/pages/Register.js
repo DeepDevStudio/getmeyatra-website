@@ -1,8 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors, shadows, breakpoints } from '../styles/theme';
-import { createCustomer } from '../services/api';
+import { registerCustomer } from '../services/api';
+
+// ============================================
+// TRANSLATION DICTIONARY
+// ============================================
+
+const translations = {
+    'Create Account': 'खाता बनाएं',
+    'Join GetMeYatra and start your journey': 'GetMeYatra से जुड़ें और अपनी यात्रा शुरू करें',
+    'Full Name': 'पूरा नाम',
+    'Phone Number': 'फोन नंबर',
+    'Email Address': 'ईमेल पता',
+    'Password': 'पासवर्ड',
+    'Confirm Password': 'पासवर्ड पुष्टि करें',
+    'By creating an account, you agree to our': 'खाता बनाकर, आप हमारी से सहमत हैं',
+    'Terms of Service': 'सेवा की शर्तें',
+    'and': 'और',
+    'Privacy Policy': 'गोपनीयता नीति',
+    'Already have an account?': 'पहले से खाता है?',
+    'Register': 'रजिस्टर करें',
+    'Registering...': 'रजिस्टर हो रहा है...',
+    'Loading...': 'लोड हो रहा है...',
+    'Full Name is required': 'पूरा नाम आवश्यक है',
+    'Phone is required': 'फोन आवश्यक है',
+    'Please enter a valid 10-digit phone number': 'कृपया 10 अंकों का मान्य फोन नंबर दर्ज करें',
+    'Email is required': 'ईमेल आवश्यक है',
+    'Please enter a valid email': 'कृपया मान्य ईमेल दर्ज करें',
+    'Password is required': 'पासवर्ड आवश्यक है',
+    'Password must be at least 6 characters': 'पासवर्ड कम से कम 6 अक्षर का होना चाहिए',
+    'Passwords do not match': 'पासवर्ड मेल नहीं खाते',
+    'Registration successful! Please login.': 'रजिस्ट्रेशन सफल! कृपया लॉगिन करें।',
+    'OR continue with': 'या इसके साथ जारी रखें',
+    'Login': 'लॉगिन',
+    'Confirm': 'पुष्टि करें',
+    'Password strength': 'पासवर्ड ताकत',
+    'Weak': 'कमजोर',
+    'Medium': 'मध्यम',
+    'Strong': 'मजबूत',
+    'Very Strong': 'बहुत मजबूत',
+};
+
+const translateText = (text, targetLang) => {
+    if (!text) return text;
+    if (targetLang === 'en') return text;
+    return translations[text] || text;
+};
 
 // ============================================
 // STYLED COMPONENTS
@@ -13,28 +58,52 @@ const PageContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px 20px 60px;
-  background: ${colors.background.main};
+  padding: 120px 20px 60px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9edf5 100%);
 `;
+
+// ============================================
+// SCROLL PROGRESS BAR
+// ============================================
+
+const ScrollProgress = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+    z-index: 9999;
+    width: ${props => props.progress}%;
+    transition: width 0.1s ease;
+`;
+
+// ============================================
+// REGISTER CARD
+// ============================================
 
 const RegisterCard = styled.div`
-  background: ${colors.background.card};
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: ${shadows.lg};
-  max-width: 420px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 48px 40px;
+  max-width: 460px;
   width: 100%;
-  border: 1px solid ${colors.neutral[100]};
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
 `;
 
-const Title = styled.h1`
-  font-size: 2rem;
-  font-weight: 800;
-  color: ${colors.neutral[900]};
+const Logo = styled.div`
   text-align: center;
   margin-bottom: 8px;
 
-  .gradient-text {
+  .logo-icon {
+    font-size: 48px;
+    display: block;
+  }
+
+  .logo-text {
+    font-size: 24px;
+    font-weight: 800;
     background: ${colors.primary.gradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -42,35 +111,66 @@ const Title = styled.h1`
   }
 `;
 
+const Title = styled.h1`
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: ${colors.neutral[900]};
+  text-align: center;
+  margin-bottom: 4px;
+`;
+
 const Subtitle = styled.p`
   color: ${colors.neutral[500]};
   text-align: center;
   font-size: 14px;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 `;
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+// ============================================
+// LANGUAGE TOGGLE
+// ============================================
+
+const LanguageToggle = styled.button`
+    padding: 6px 16px;
+    border-radius: 50px;
+    border: 2px solid ${colors.primary.main};
+    background: ${props => props.lang === 'hi' ? colors.primary.gradient : 'transparent'};
+    color: ${props => props.lang === 'hi' ? '#fff' : colors.primary.main};
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 16px;
+    margin-left: auto;
+    display: block;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+    }
 `;
 
 const FormGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  margin-bottom: 18px;
 `;
 
 const Label = styled.label`
+  display: block;
   font-weight: 600;
   font-size: 14px;
   color: ${colors.neutral[700]};
+  margin-bottom: 6px;
+
+  .required {
+    color: ${colors.status.error};
+  }
 `;
 
 const Input = styled.input`
+  width: 100%;
   padding: 12px 16px;
   border: 2px solid ${({ error }) => error ? colors.status.error : colors.neutral[200]};
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
   transition: all 0.3s ease;
   outline: none;
@@ -78,60 +178,69 @@ const Input = styled.input`
 
   &:focus {
     border-color: ${colors.primary.main};
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
   }
 
-  &::placeholder {
-    color: ${colors.neutral[400]};
+  &:disabled {
+    background: ${colors.neutral[50]};
+    cursor: not-allowed;
   }
 `;
 
 const ErrorText = styled.span`
   color: ${colors.status.error};
   font-size: 12px;
+  display: block;
   margin-top: 4px;
 `;
 
-const PasswordWrapper = styled.div`
-  position: relative;
+// ============================================
+// PASSWORD STRENGTH
+// ============================================
 
-  input {
-    padding-right: 48px;
-    width: 100%;
-  }
-
-  .toggle-btn {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: ${colors.neutral[500]};
-    font-size: 16px;
-    padding: 4px;
-
-    &:hover {
-      color: ${colors.neutral[700]};
-    }
-  }
+const StrengthContainer = styled.div`
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
 `;
 
+const StrengthBar = styled.div`
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: ${props => props.bg || colors.neutral[200]};
+  transition: all 0.3s ease;
+`;
+
+const StrengthLabel = styled.span`
+  font-size: 12px;
+  font-weight: 600;
+  color: ${props => props.color || colors.neutral[500]};
+  min-width: 50px;
+  text-align: right;
+`;
+
+// ============================================
+// BUTTONS
+// ============================================
+
 const SubmitButton = styled.button`
+  width: 100%;
   padding: 14px;
   background: ${colors.primary.gradient};
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
   }
 
   &:disabled {
@@ -145,37 +254,110 @@ const Divider = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 8px 0;
+  margin: 24px 0;
 
-  &::before, &::after {
-    content: '';
+  hr {
     flex: 1;
-    height: 1px;
-    background: ${colors.neutral[200]};
+    border: none;
+    border-top: 1px solid ${colors.neutral[200]};
   }
 
   span {
-    color: ${colors.neutral[500]};
+    color: ${colors.neutral[400]};
     font-size: 13px;
+    font-weight: 500;
     white-space: nowrap;
   }
+`;
+
+const SocialButtons = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+`;
+
+const SocialButton = styled.button`
+  flex: 1;
+  padding: 12px;
+  border: 2px solid ${colors.neutral[200]};
+  border-radius: 12px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: ${colors.neutral[700]};
+
+  &:hover {
+    border-color: ${colors.primary.main};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  }
+
+  .icon {
+    font-size: 20px;
+  }
+
+  &.google { color: #EA4335; }
+  &.facebook { color: #1877F2; }
 `;
 
 const LoginLink = styled.p`
   text-align: center;
   font-size: 14px;
-  color: ${colors.neutral[600]};
+  color: ${colors.neutral[500]};
   margin-top: 8px;
 
   a {
     color: ${colors.primary.main};
     font-weight: 600;
     text-decoration: none;
+    transition: all 0.3s ease;
 
     &:hover {
       text-decoration: underline;
     }
   }
+`;
+
+const TermsText = styled.p`
+  text-align: center;
+  font-size: 12px;
+  color: ${colors.neutral[400]};
+  margin-bottom: 16px;
+  line-height: 1.6;
+
+  a {
+    color: ${colors.primary.main};
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const ErrorMessage = styled.div`
+  background: #FEE2E2;
+  color: #DC2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+`;
+
+const SuccessMessage = styled.div`
+  background: #D1FAE5;
+  color: #065F46;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
 `;
 
 // ============================================
@@ -184,92 +366,162 @@ const LoginLink = styled.p`
 
 function Register() {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [language, setLanguage] = useState('en');
+    const [scrollProgress, setScrollProgress] = useState(0);
     const [formData, setFormData] = useState({
-        name: '',
+        full_name: '',
         phone: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirm_password: '',
+        accept_terms: false,
     });
-    const [formErrors, setFormErrors] = useState({});
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState({ score: 0, label: '', color: '' });
+
+    const t = (text) => translateText(text, language);
+
+    useEffect(() => {
+        const handleScrollProgress = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            setScrollProgress(progress);
+        };
+        window.addEventListener('scroll', handleScrollProgress);
+        return () => window.removeEventListener('scroll', handleScrollProgress);
+    }, []);
+
+    useEffect(() => {
+        // Check if already logged in
+        const customer = JSON.parse(localStorage.getItem('customer') || '{}');
+        if (customer.phone) {
+            navigate('/dashboard');
+        }
+    }, []);
+
+    useEffect(() => {
+        // Calculate password strength
+        const pwd = formData.password;
+        let score = 0;
+        if (pwd.length >= 6) score++;
+        if (pwd.length >= 10) score++;
+        if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+        if (/\d/.test(pwd)) score++;
+        if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+
+        const strengthMap = {
+            0: { label: t('Weak'), color: '#EF4444' },
+            1: { label: t('Weak'), color: '#EF4444' },
+            2: { label: t('Medium'), color: '#F59E0B' },
+            3: { label: t('Medium'), color: '#F59E0B' },
+            4: { label: t('Strong'), color: '#22C55E' },
+            5: { label: t('Very Strong'), color: '#22C55E' },
+        };
+
+        setPasswordStrength({
+            score,
+            label: strengthMap[Math.min(score, 5)].label,
+            color: strengthMap[Math.min(score, 5)].color,
+        });
+    }, [formData.password]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        if (formErrors[name]) {
-            setFormErrors(prev => ({ ...prev, [name]: '' }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
         }
-        if (error) setError('');
+        setError('');
+        setSuccess('');
     };
 
     const validateForm = () => {
         const errors = {};
         let isValid = true;
 
-        if (!formData.name.trim()) {
-            errors.name = 'Full name is required';
+        if (!formData.full_name.trim()) {
+            errors.full_name = t('Full Name is required');
             isValid = false;
         }
 
         if (!formData.phone.trim()) {
-            errors.phone = 'Phone number is required';
+            errors.phone = t('Phone is required');
             isValid = false;
         } else if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
-            errors.phone = 'Please enter a valid 10-digit phone number';
+            errors.phone = t('Please enter a valid 10-digit phone number');
             isValid = false;
         }
 
-        if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-            errors.email = 'Please enter a valid email address';
+        if (!formData.email.trim()) {
+            errors.email = t('Email is required');
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+            errors.email = t('Please enter a valid email');
             isValid = false;
         }
 
         if (!formData.password.trim()) {
-            errors.password = 'Password is required';
+            errors.password = t('Password is required');
             isValid = false;
         } else if (formData.password.length < 6) {
-            errors.password = 'Password must be at least 6 characters';
+            errors.password = t('Password must be at least 6 characters');
             isValid = false;
         }
 
-        if (!formData.confirmPassword.trim()) {
-            errors.confirmPassword = 'Please confirm your password';
-            isValid = false;
-        } else if (formData.password !== formData.confirmPassword) {
-            errors.confirmPassword = 'Passwords do not match';
+        if (formData.confirm_password !== formData.password) {
+            errors.confirm_password = t('Passwords do not match');
             isValid = false;
         }
 
-        setFormErrors(errors);
+        if (!formData.accept_terms) {
+            errors.accept_terms = 'Please accept the terms and conditions';
+            isValid = false;
+        }
+
+        setErrors(errors);
         return isValid;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
 
         if (!validateForm()) {
             return;
         }
 
-        setLoading(true);
-
         try {
-            const customerData = {
-                customer_name: formData.name,
-                mobile_number: formData.phone,
-                email: formData.email || '',
-                password: formData.password
-            };
+            setLoading(true);
+            setError('');
+            setSuccess('');
 
-            await createCustomer(customerData);
-            
-            // Redirect to login page
-            navigate('/login');
+            const response = await registerCustomer({
+                customer_name: formData.full_name,
+                mobile_number: formData.phone,
+                email: formData.email,
+                password: formData.password,
+            });
+
+            setSuccess(t('Registration successful! Please login.'));
+            setFormData({
+                full_name: '',
+                phone: '',
+                email: '',
+                password: '',
+                confirm_password: '',
+                accept_terms: false,
+            });
+
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+
         } catch (err) {
             console.error('Registration error:', err);
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -278,121 +530,165 @@ function Register() {
         }
     };
 
+    const toggleLanguage = () => {
+        setLanguage(language === 'en' ? 'hi' : 'en');
+    };
+
+    const getStrengthBarColor = (index) => {
+        if (index < passwordStrength.score) {
+            return passwordStrength.color;
+        }
+        return colors.neutral[200];
+    };
+
     return (
         <PageContainer>
+            <ScrollProgress progress={scrollProgress} />
+            
             <RegisterCard>
-                <Title>
-                    Create <span className="gradient-text">Account</span>
-                </Title>
-                <Subtitle>Join GetMeYatra and start your journey</Subtitle>
+                <LanguageToggle lang={language} onClick={toggleLanguage}>
+                    {language === 'en' ? '🇮🇳 हिंदी' : '🇬🇧 English'}
+                </LanguageToggle>
 
-                <Form onSubmit={handleSubmit}>
-                    {error && (
-                        <ErrorText style={{ textAlign: 'center', padding: '10px', background: '#FEE2E2', borderRadius: '8px' }}>
-                            {error}
-                        </ErrorText>
-                    )}
+                <Logo>
+                    <span className="logo-icon">🚐</span>
+                    <div className="logo-text">GetMeYatra</div>
+                </Logo>
 
+                <Title>{t('Create Account')}</Title>
+                <Subtitle>{t('Join GetMeYatra and start your journey')}</Subtitle>
+
+                {error && <ErrorMessage>{error}</ErrorMessage>}
+                {success && <SuccessMessage>{success}</SuccessMessage>}
+
+                <form onSubmit={handleSubmit}>
                     <FormGroup>
-                        <Label>Full Name <span style={{ color: colors.status.error }}>*</span></Label>
+                        <Label>{t('Full Name')} <span className="required">*</span></Label>
                         <Input
                             type="text"
-                            name="name"
+                            name="full_name"
                             placeholder="Enter your full name"
-                            value={formData.name}
+                            value={formData.full_name}
                             onChange={handleChange}
-                            error={formErrors.name}
+                            error={errors.full_name}
                             disabled={loading}
                         />
-                        {formErrors.name && <ErrorText>{formErrors.name}</ErrorText>}
+                        {errors.full_name && <ErrorText>{errors.full_name}</ErrorText>}
                     </FormGroup>
 
                     <FormGroup>
-                        <Label>Phone Number <span style={{ color: colors.status.error }}>*</span></Label>
+                        <Label>{t('Phone Number')} <span className="required">*</span></Label>
                         <Input
                             type="tel"
                             name="phone"
                             placeholder="Enter 10-digit phone number"
                             value={formData.phone}
                             onChange={handleChange}
-                            error={formErrors.phone}
+                            error={errors.phone}
                             disabled={loading}
                         />
-                        {formErrors.phone && <ErrorText>{formErrors.phone}</ErrorText>}
+                        {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
                     </FormGroup>
 
                     <FormGroup>
-                        <Label>Email Address</Label>
+                        <Label>{t('Email Address')} <span className="required">*</span></Label>
                         <Input
                             type="email"
                             name="email"
                             placeholder="Enter your email address"
                             value={formData.email}
                             onChange={handleChange}
-                            error={formErrors.email}
+                            error={errors.email}
                             disabled={loading}
                         />
-                        {formErrors.email && <ErrorText>{formErrors.email}</ErrorText>}
+                        {errors.email && <ErrorText>{errors.email}</ErrorText>}
                     </FormGroup>
 
                     <FormGroup>
-                        <Label>Password <span style={{ color: colors.status.error }}>*</span></Label>
-                        <PasswordWrapper>
-                            <Input
-                                type={showPassword ? 'text' : 'password'}
-                                name="password"
-                                placeholder="Create a password (min 6 characters)"
-                                value={formData.password}
-                                onChange={handleChange}
-                                error={formErrors.password}
-                                disabled={loading}
-                            />
-                            <button
-                                type="button"
-                                className="toggle-btn"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                            </button>
-                        </PasswordWrapper>
-                        {formErrors.password && <ErrorText>{formErrors.password}</ErrorText>}
+                        <Label>{t('Password')} <span className="required">*</span></Label>
+                        <Input
+                            type="password"
+                            name="password"
+                            placeholder="Create a password (min 6 characters)"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={errors.password}
+                            disabled={loading}
+                        />
+                        {formData.password && (
+                            <StrengthContainer>
+                                {[0, 1, 2, 3, 4].map((i) => (
+                                    <StrengthBar key={i} bg={getStrengthBarColor(i)} />
+                                ))}
+                                <StrengthLabel color={passwordStrength.color}>
+                                    {passwordStrength.label}
+                                </StrengthLabel>
+                            </StrengthContainer>
+                        )}
+                        {errors.password && <ErrorText>{errors.password}</ErrorText>}
                     </FormGroup>
 
                     <FormGroup>
-                        <Label>Confirm Password <span style={{ color: colors.status.error }}>*</span></Label>
-                        <PasswordWrapper>
-                            <Input
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                name="confirmPassword"
-                                placeholder="Confirm your password"
-                                value={formData.confirmPassword}
+                        <Label>{t('Confirm Password')} <span className="required">*</span></Label>
+                        <Input
+                            type="password"
+                            name="confirm_password"
+                            placeholder="Confirm your password"
+                            value={formData.confirm_password}
+                            onChange={handleChange}
+                            error={errors.confirm_password}
+                            disabled={loading}
+                        />
+                        {errors.confirm_password && <ErrorText>{errors.confirm_password}</ErrorText>}
+                    </FormGroup>
+
+                    <FormGroup>
+                        <Label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                name="accept_terms"
+                                checked={formData.accept_terms}
                                 onChange={handleChange}
-                                error={formErrors.confirmPassword}
-                                disabled={loading}
+                                style={{ width: '18px', height: '18px', accentColor: colors.primary.main }}
                             />
-                            <button
-                                type="button"
-                                className="toggle-btn"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                            </button>
-                        </PasswordWrapper>
-                        {formErrors.confirmPassword && <ErrorText>{formErrors.confirmPassword}</ErrorText>}
+                            {t('By creating an account, you agree to our')}{' '}
+                            <a href="#" style={{ color: colors.primary.main, textDecoration: 'none' }}>
+                                {t('Terms of Service')}
+                            </a>
+                            {' '}{t('and')}{' '}
+                            <a href="#" style={{ color: colors.primary.main, textDecoration: 'none' }}>
+                                {t('Privacy Policy')}
+                            </a>
+                        </Label>
+                        {errors.accept_terms && <ErrorText>{errors.accept_terms}</ErrorText>}
                     </FormGroup>
 
                     <SubmitButton type="submit" disabled={loading}>
-                        {loading ? 'Creating Account...' : 'Create Account →'}
+                        {loading ? t('Registering...') : t('Register')}
                     </SubmitButton>
+                </form>
 
-                    <Divider>
-                        <span>Already have an account?</span>
-                    </Divider>
+                <Divider>
+                    <hr />
+                    <span>{t('OR continue with')}</span>
+                    <hr />
+                </Divider>
 
-                    <LoginLink>
-                        <Link to="/login">Login to your account</Link>
-                    </LoginLink>
-                </Form>
+                <SocialButtons>
+                    <SocialButton className="google">
+                        <span className="icon">G</span>
+                        Google
+                    </SocialButton>
+                    <SocialButton className="facebook">
+                        <span className="icon">f</span>
+                        Facebook
+                    </SocialButton>
+                </SocialButtons>
+
+                <LoginLink>
+                    {t('Already have an account?')}{' '}
+                    <Link to="/login">{t('Login')}</Link>
+                </LoginLink>
             </RegisterCard>
         </PageContainer>
     );

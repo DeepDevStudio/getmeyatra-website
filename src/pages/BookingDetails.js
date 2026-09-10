@@ -5,19 +5,67 @@ import { colors, shadows, breakpoints } from '../styles/theme';
 import api from '../services/api';
 
 // ============================================
+// TRANSLATION DICTIONARY
+// ============================================
+
+const translations = {
+    'Booking Details': 'बुकिंग विवरण',
+    'Booking ID': 'बुकिंग आईडी',
+    'Tour Details': 'यात्रा विवरण',
+    'Tour Name': 'यात्रा का नाम',
+    'Start Date': 'प्रारंभ तिथि',
+    'End Date': 'समाप्ति तिथि',
+    'Total Seats': 'कुल सीटें',
+    'Seat Numbers': 'सीट संख्या',
+    'Payment Details': 'भुगतान विवरण',
+    'Total Amount': 'कुल राशि',
+    'Advance Paid': 'अग्रिम भुगतान',
+    'Balance': 'शेष राशि',
+    'Payment Mode': 'भुगतान मोड',
+    'Status': 'स्थिति',
+    'Cancel Booking': 'बुकिंग रद्द करें',
+    'Print Receipt': 'रसीद प्रिंट करें',
+    'Book Another Tour': 'एक और यात्रा बुक करें',
+    'Back to Dashboard': 'डैशबोर्ड पर वापस जाएँ',
+    'Loading booking details...': 'बुकिंग विवरण लोड हो रहा है...',
+    'Booking not found': 'बुकिंग नहीं मिली',
+    'Failed to load booking details': 'बुकिंग विवरण लोड करने में विफल',
+    "We couldn't find the booking you're looking for.": 'हमें वह बुकिंग नहीं मिली जिसे आप ढूंढ रहे हैं।',
+    'Are you sure you want to cancel this booking?': 'क्या आप वाकई इस बुकिंग को रद्द करना चाहते हैं?',
+    'Booking cancelled successfully!': 'बुकिंग सफलतापूर्वक रद्द कर दी गई!',
+    'Failed to cancel booking. Please try again.': 'बुकिंग रद्द करने में विफल। कृपया पुनः प्रयास करें।',
+    'Confirmed': 'पुष्टि की गई',
+    'Pending': 'लंबित',
+    'Completed': 'समाप्त',
+    'Cancelled': 'रद्द कर दिया गया',
+    'Pickup Location': 'पिकअप स्थान',
+    'Additional Passengers': 'अतिरिक्त यात्री',
+    'Customer Details': 'ग्राहक विवरण',
+    'Name': 'नाम',
+    'Phone': 'फोन',
+    'Email': 'ईमेल',
+};
+
+const translateText = (text, targetLang) => {
+    if (!text) return text;
+    if (targetLang === 'en') return text;
+    return translations[text] || text;
+};
+
+// ============================================
 // STYLED COMPONENTS
 // ============================================
 
 const PageContainer = styled.div`
   padding-top: 160px;
   min-height: 100vh;
-  background: ${colors.background.main};
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9edf5 100%);
 `;
 
 const Container = styled.div`
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 20px 60px;
 `;
 
 const BackLink = styled(Link)`
@@ -33,12 +81,33 @@ const BackLink = styled(Link)`
   }
 `;
 
+const LanguageToggle = styled.button`
+  padding: 6px 16px;
+  border-radius: 50px;
+  border: 2px solid ${colors.primary.main};
+  background: ${props => props.lang === 'hi' ? colors.primary.gradient : 'transparent'};
+  color: ${props => props.lang === 'hi' ? '#fff' : colors.primary.main};
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  margin-left: auto;
+  display: block;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+  }
+`;
+
 const Card = styled.div`
-  background: ${colors.background.card};
-  border-radius: 16px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 32px;
-  box-shadow: ${shadows.md};
-  border: 1px solid ${colors.neutral[100]};
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.3);
 `;
 
 const Title = styled.h1`
@@ -192,12 +261,12 @@ const LoadingSpinner = styled.div`
 `;
 
 const ErrorBox = styled.div`
-  background: ${colors.background.card};
-  border-radius: 16px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
   padding: 40px;
   text-align: center;
-  box-shadow: ${shadows.md};
-  border: 1px solid ${colors.neutral[100]};
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.3);
 
   h2 {
     color: ${colors.status.error};
@@ -211,7 +280,6 @@ const ErrorBox = styled.div`
   }
 `;
 
-// ===== FLOATING WHATSAPP BUTTON =====
 const FloatingWhatsApp = styled.a`
     position: fixed;
     bottom: 120px;
@@ -247,6 +315,9 @@ function BookingDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [cancelling, setCancelling] = useState(false);
+    const [language, setLanguage] = useState('en');
+
+    const t = (text) => translateText(text, language);
 
     useEffect(() => {
         const customer = JSON.parse(localStorage.getItem('customer') || '{}');
@@ -265,23 +336,23 @@ function BookingDetails() {
             setError(null);
         } catch (err) {
             console.error('Error loading booking details:', err);
-            setError('Failed to load booking details');
+            setError(t('Failed to load booking details'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleCancelBooking = async () => {
-        if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+        if (!window.confirm(t('Are you sure you want to cancel this booking?'))) return;
         
         setCancelling(true);
         try {
             await api.put(`/yatra-bookings/${id}/cancel`);
-            alert('✅ Booking cancelled successfully!');
+            alert('✅ ' + t('Booking cancelled successfully!'));
             loadBookingDetails();
         } catch (err) {
             console.error('Error cancelling booking:', err);
-            alert('❌ Failed to cancel booking. Please try again.');
+            alert('❌ ' + t('Failed to cancel booking. Please try again.'));
         } finally {
             setCancelling(false);
         }
@@ -289,6 +360,10 @@ function BookingDetails() {
 
     const handlePrint = () => {
         window.print();
+    };
+
+    const toggleLanguage = () => {
+        setLanguage(language === 'en' ? 'hi' : 'en');
     };
 
     const formatDate = (dateStr) => {
@@ -304,15 +379,15 @@ function BookingDetails() {
     const getStatusInfo = (status) => {
         const s = status?.toLowerCase() || '';
         if (s === 'confirmed' || s === 'active') {
-            return { label: 'Confirmed', bg: '#D1FAE5', color: '#065F46' };
+            return { label: t('Confirmed'), bg: '#D1FAE5', color: '#065F46' };
         } else if (s === 'pending') {
-            return { label: 'Pending', bg: '#FEF3C7', color: '#92400E' };
+            return { label: t('Pending'), bg: '#FEF3C7', color: '#92400E' };
         } else if (s === 'completed') {
-            return { label: 'Completed', bg: '#DBEAFE', color: '#1E40AF' };
+            return { label: t('Completed'), bg: '#DBEAFE', color: '#1E40AF' };
         } else if (s === 'cancelled') {
-            return { label: 'Cancelled', bg: '#FEE2E2', color: '#991B1B' };
+            return { label: t('Cancelled'), bg: '#FEE2E2', color: '#991B1B' };
         } else {
-            return { label: status || 'Confirmed', bg: '#F3F4F6', color: '#374151' };
+            return { label: status || t('Confirmed'), bg: '#F3F4F6', color: '#374151' };
         }
     };
 
@@ -322,7 +397,7 @@ function BookingDetails() {
                 <Container>
                     <LoadingSpinner>
                         <div className="spinner"></div>
-                        <p>Loading booking details...</p>
+                        <p>{t('Loading booking details...')}</p>
                     </LoadingSpinner>
                 </Container>
             </PageContainer>
@@ -334,10 +409,10 @@ function BookingDetails() {
             <PageContainer>
                 <Container>
                     <ErrorBox>
-                        <h2>❌ {error || 'Booking not found'}</h2>
-                        <p>We couldn't find the booking you're looking for.</p>
+                        <h2>❌ {error || t('Booking not found')}</h2>
+                        <p>{t("We couldn't find the booking you're looking for.")}</p>
                         <Link to="/dashboard" style={{ color: colors.primary.main, fontWeight: 600, textDecoration: 'none' }}>
-                            ← Back to Dashboard
+                            ← {t('Back to Dashboard')}
                         </Link>
                     </ErrorBox>
                 </Container>
@@ -351,65 +426,88 @@ function BookingDetails() {
     return (
         <PageContainer>
             <Container>
-                <BackLink to="/dashboard">← Back to Dashboard</BackLink>
+                <LanguageToggle lang={language} onClick={toggleLanguage}>
+                    {language === 'en' ? '🇮🇳 हिंदी' : '🇬🇧 English'}
+                </LanguageToggle>
+
+                <BackLink to="/dashboard">← {t('Back to Dashboard')}</BackLink>
 
                 <Card>
-                    <Title>Booking <span>Details</span></Title>
-                    <Subtitle>Booking ID: #{booking.id} • {formatDate(booking.created_at)}</Subtitle>
+                    <Title>{t('Booking')} <span>{t('Details')}</span></Title>
+                    <Subtitle>{t('Booking ID')}: #{booking.id} • {formatDate(booking.created_at)}</Subtitle>
 
                     <DetailsGrid>
                         {/* Tour Details */}
                         <Section>
-                            <h3>🚌 Tour Details</h3>
+                            <h3>🚌 {t('Tour Details')}</h3>
                             <DetailRow>
-                                <span className="label">Tour Name</span>
+                                <span className="label">{t('Tour Name')}</span>
                                 <span className="value">{booking.yatra_name || 'N/A'}</span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Start Date</span>
+                                <span className="label">{t('Start Date')}</span>
                                 <span className="value">{formatDate(booking.start_date)}</span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">End Date</span>
+                                <span className="label">{t('End Date')}</span>
                                 <span className="value">{formatDate(booking.end_date)}</span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Total Seats</span>
+                                <span className="label">{t('Total Seats')}</span>
                                 <span className="value">{booking.total_seats || 0}</span>
                             </DetailRow>
+                            {booking.pickup_location && (
+                                <DetailRow>
+                                    <span className="label">{t('Pickup Location')}</span>
+                                    <span className="value">{booking.pickup_location}</span>
+                                </DetailRow>
+                            )}
+                        </Section>
+
+                        {/* Customer Details */}
+                        <Section>
+                            <h3>👤 {t('Customer Details')}</h3>
                             <DetailRow>
-                                <span className="label">Seat Numbers</span>
-                                <span className="value">{booking.seat_numbers?.join(', ') || 'N/A'}</span>
+                                <span className="label">{t('Name')}</span>
+                                <span className="value">{booking.customer_name || 'N/A'}</span>
+                            </DetailRow>
+                            <DetailRow>
+                                <span className="label">{t('Phone')}</span>
+                                <span className="value">{booking.phone || 'N/A'}</span>
+                            </DetailRow>
+                            <DetailRow>
+                                <span className="label">{t('Email')}</span>
+                                <span className="value">{booking.email || 'N/A'}</span>
                             </DetailRow>
                         </Section>
 
                         {/* Payment Details */}
                         <Section>
-                            <h3>💰 Payment Details</h3>
+                            <h3>💰 {t('Payment Details')}</h3>
                             <DetailRow>
-                                <span className="label">Total Amount</span>
+                                <span className="label">{t('Total Amount')}</span>
                                 <span className="value" style={{ color: colors.primary.main, fontWeight: 800 }}>
                                     ₹{booking.total_amount || 0}
                                 </span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Advance Paid</span>
+                                <span className="label">{t('Advance Paid')}</span>
                                 <span className="value" style={{ color: '#22C55E' }}>
                                     ₹{booking.advance_amount || 0}
                                 </span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Balance</span>
+                                <span className="label">{t('Balance')}</span>
                                 <span className="value" style={{ color: colors.status.error }}>
                                     ₹{booking.balance_amount || 0}
                                 </span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Payment Mode</span>
+                                <span className="label">{t('Payment Mode')}</span>
                                 <span className="value">{booking.payment_mode || 'Cash'}</span>
                             </DetailRow>
                             <DetailRow>
-                                <span className="label">Status</span>
+                                <span className="label">{t('Status')}</span>
                                 <span className="value">
                                     <StatusBadge bg={statusInfo.bg} color={statusInfo.color}>
                                         {statusInfo.label}
@@ -417,6 +515,19 @@ function BookingDetails() {
                                 </span>
                             </DetailRow>
                         </Section>
+
+                        {/* Additional Passengers */}
+                        {booking.additional_customers && booking.additional_customers.length > 0 && (
+                            <Section>
+                                <h3>👥 {t('Additional Passengers')}</h3>
+                                {booking.additional_customers.map((passenger, index) => (
+                                    <DetailRow key={index}>
+                                        <span className="label">Passenger {index + 1}</span>
+                                        <span className="value">{passenger.name} ({passenger.phone})</span>
+                                    </DetailRow>
+                                ))}
+                            </Section>
+                        )}
                     </DetailsGrid>
 
                     {/* Actions */}
@@ -427,20 +538,19 @@ function BookingDetails() {
                                 onClick={handleCancelBooking}
                                 disabled={cancelling}
                             >
-                                {cancelling ? 'Cancelling...' : '❌ Cancel Booking'}
+                                {cancelling ? '...' : '❌ ' + t('Cancel Booking')}
                             </ActionButton>
                         )}
                         <ActionButton className="outline" onClick={handlePrint}>
-                            🖨️ Print Receipt
+                            🖨️ {t('Print Receipt')}
                         </ActionButton>
                         <Link to="/tours" style={{ textDecoration: 'none' }}>
-                            <ActionButton>📋 Book Another Tour</ActionButton>
+                            <ActionButton>📋 {t('Book Another Tour')}</ActionButton>
                         </Link>
                     </Actions>
                 </Card>
             </Container>
 
-            {/* ===== FLOATING WHATSAPP BUTTON ===== */}
             <FloatingWhatsApp 
                 href={`https://wa.me/918010320000?text=Hi%20I%20have%20a%20question%20about%20my%20booking%20%23${booking.id}`}
                 target="_blank"

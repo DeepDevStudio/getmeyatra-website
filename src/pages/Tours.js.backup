@@ -1,0 +1,1797 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { getYatras, getDestinationImage } from '../services/api';
+import styled from 'styled-components';
+import { colors, shadows, breakpoints } from '../styles/theme';
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+};
+
+const formatDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return '';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
+
+const formatTime = (time) => {
+    if (!time) return '';
+    const parts = time.split(':');
+    const h = parseInt(parts[0]);
+    const m = parts[1] || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${m} ${ampm}`;
+};
+
+// ============================================
+// TRANSLATION DICTIONARY
+// ============================================
+
+const translations = {
+    'Day': 'दिन',
+    'Days': 'दिन',
+    'Morning': 'सुबह',
+    'Evening': 'शाम',
+    'Night': 'रात',
+    'Afternoon': 'दोपहर',
+    'AM': 'पूर्वाह्न',
+    'PM': 'अपराह्न',
+    'Arrival': 'आगमन',
+    'Departure': 'प्रस्थान',
+    'Pickup': 'पिकअप',
+    'Drop': 'ड्रॉप',
+    'Journey': 'यात्रा',
+    'Return': 'वापसी',
+    'Transfer': 'स्थानांतरण',
+    'Sightseeing': 'दर्शनीय स्थल',
+    'Shopping': 'खरीदारी',
+    'Trip': 'यात्रा',
+    'Tour': 'यात्रा',
+    'Travel': 'यात्रा',
+    'Visit': 'भ्रमण',
+    'Explore': 'अन्वेषण',
+    'Temple': 'मंदिर',
+    'Darshan': 'दर्शन',
+    'Pilgrimage': 'तीर्थयात्रा',
+    'Spiritual': 'आध्यात्मिक',
+    'Blessings': 'आशीर्वाद',
+    'Prayer': 'प्रार्थना',
+    'Aarti': 'आरती',
+    'Ashram': 'आश्रम',
+    'Ghat': 'घाट',
+    'Holy': 'पवित्र',
+    'Divine': 'दिव्य',
+    'Breakfast': 'नाश्ता',
+    'Lunch': 'दोपहर का भोजन',
+    'Dinner': 'रात का भोजन',
+    'Snacks': 'नाश्ता',
+    'Tea': 'चाय',
+    'Water': 'पानी',
+    'Hotel': 'होटल',
+    'Check-in': 'चेक-इन',
+    'Check-out': 'चेक-आउट',
+    'Room': 'कमरा',
+    'Stay': 'प्रवास',
+    'Overnight': 'रात्रि प्रवास',
+    'Bus': 'बस',
+    'Car': 'कार',
+    'Cab': 'कैब',
+    'Driver': 'ड्राइवर',
+    'AC': 'एसी',
+    'Seat': 'सीट',
+    'Seats': 'सीटें',
+    'Guide': 'गाइड',
+    'Group': 'समूह',
+    'Family': 'परिवार',
+    'Solo': 'एकल',
+    'Booking': 'बुकिंग',
+    'Payment': 'भुगतान',
+    'Cash': 'नकद',
+    'Online': 'ऑनलाइन',
+    'Package': 'पैकेज',
+    'Price': 'कीमत',
+    'Cost': 'लागत',
+    'Total': 'कुल',
+    'Advance': 'अग्रिम',
+    'Balance': 'शेष',
+    'Discount': 'छूट',
+    'Inclusions': 'शामिल सेवाएँ',
+    'Exclusions': 'शामिल नहीं',
+    'Notes': 'सुझाव',
+    'Itinerary': 'यात्रा कार्यक्रम',
+    'Important Notes': 'महत्वपूर्ण सुझाव',
+    "What's Included": 'शामिल सेवाएँ',
+    "What's Not Included": 'शामिल नहीं',
+    'No itinerary available': 'कोई यात्रा कार्यक्रम उपलब्ध नहीं है',
+    'No highlights available': 'कोई विशेषताएँ उपलब्ध नहीं हैं',
+    'Select Date': 'तिथि चुनें',
+    'Book Now': 'अभी बुक करें',
+    'WhatsApp Inquiry': 'व्हाट्सएप पूछताछ',
+    'Share': 'साझा करें',
+    'All Status': 'सभी स्थिति',
+    'Upcoming': 'आगामी',
+    'Ongoing': 'जारी',
+    'Completed': 'समाप्त',
+    'trips': 'यात्राएँ',
+    'Trip Type': 'यात्रा प्रकार',
+    'Duration': 'अवधि',
+    'Trip Count': 'यात्रा गणना',
+    'tour found': 'यात्रा मिली',
+    'tours found': 'यात्राएँ मिलीं',
+    'No trips available': 'कोई यात्रा उपलब्ध नहीं है',
+    'Select a Destination': 'एक गंतव्य चुनें',
+    'All Destinations': 'सभी गंतव्य',
+    'All Tours': 'सभी यात्राएँ',
+    'of': 'में से',
+    'seat': 'सीट',
+    'View Details': 'विवरण देखें',
+    'Available Tours in': 'में उपलब्ध यात्राएँ',
+    'Similar Tours You Might Like': 'समान यात्राएँ जो आपको पसंद आ सकती हैं',
+    'Loading amazing tours for you...': 'आपके लिए अद्भुत यात्राएँ लोड हो रही हैं...',
+    'Search tours...': 'यात्राएँ खोजें...',
+    'Clear Filters': 'फ़िल्टर साफ़ करें',
+    'Min ₹': 'न्यूनतम ₹',
+    'Max ₹': 'अधिकतम ₹',
+    'Day 1': 'दिन 1',
+    'Day 2': 'दिन 2',
+    'Day 3': 'दिन 3',
+    'Day 4': 'दिन 4',
+    'Day 5': 'दिन 5',
+    'Day 6': 'दिन 6',
+    'Day 7': 'दिन 7',
+    'Day 8': 'दिन 8',
+    'Day 9': 'दिन 9',
+    'Day 10': 'दिन 10',
+    'AC Tempo Traveller': 'एसी टेम्पो ट्रैवलर',
+    'AC Bus': 'एसी बस',
+    'Bus Transport': 'बस परिवहन',
+    'Hotel Stay': 'होटल प्रवास',
+    'Meals: Breakfast': 'भोजन: नाश्ता',
+    'Meals: Dinner': 'भोजन: रात का खाना',
+    'Experienced Tour Coordinator': 'अनुभवी टूर कोऑर्डिनेटर',
+    'All taxes included': 'सभी कर शामिल',
+    'Personal expenses': 'व्यक्तिगत खर्च',
+    'Adventure activities': 'साहसिक गतिविधियाँ',
+    'Paragliding': 'पैराग्लाइडिंग',
+    'Zorbing': 'ज़ॉर्बिंग',
+    'Travel insurance': 'यात्रा बीमा',
+    'Any meals not mentioned': 'कोई भी भोजन उल्लेख नहीं किया गया',
+    'Carry warm clothes': 'गर्म कपड़े ले जाएं',
+    'Carry ID proof': 'आईडी प्रूफ ले जाएं',
+    'Aadhar': 'आधार',
+    'Driving License': 'ड्राइविंग लाइसेंस',
+    'Carry medication if needed': 'यदि आवश्यक हो तो दवा ले जाएं',
+    'Follow group timings': 'समूह समय का पालन करें',
+    'Respect local customs and traditions': 'स्थानीय रीति-रिवाजों और परंपराओं का सम्मान करें',
+    'Holy Dip': 'पवित्र स्नान',
+    'Ganga Aarti': 'गंगा आरती',
+    'Bonfire': 'बोनफायर',
+    'DJ Music': 'डीजे म्यूज़िक',
+    'Rafting': 'राफ्टिंग',
+    'Trekking': 'ट्रेकिंग',
+    'Swimming': 'तैराकी',
+    'Games': 'खेल',
+    'Start Time': 'प्रारंभ समय',
+    'Return Time': 'वापसी समय',
+};
+
+const translateText = (text, targetLang) => {
+    if (!text) return text;
+    if (targetLang === 'en') return text;
+    
+    let result = text;
+    const sortedKeys = Object.keys(translations).sort((a, b) => b.length - a.length);
+    
+    for (const key of sortedKeys) {
+        const pattern = new RegExp(`\\b${key}\\b`, 'gi');
+        result = result.replace(pattern, translations[key]);
+    }
+    
+    return result;
+};
+
+// ============================================
+// EXTRACT DESTINATION FROM TOUR NAME
+// ============================================
+const extractDestination = (yatraName) => {
+    if (!yatraName) return 'Other';
+    const name = yatraName.toLowerCase();
+    if (name.includes('vrindavan') || name.includes('barsana') || name.includes('bhandirvan') || name.includes('bansivat')) return 'Vrindavan';
+    if (name.includes('khatu') || name.includes('salasar') || name.includes('rani sati')) return 'Khatu Shyam';
+    if (name.includes('haridwar') || name.includes('rishikesh')) return 'Haridwar';
+    if (name.includes('manali') || name.includes('sissu') || name.includes('kasol') || name.includes('manikaran')) return 'Manali';
+    return 'Other';
+};
+
+// ============================================
+// GET TRIP TYPE FROM TOUR NAME
+// ============================================
+const getTripType = (yatraName) => {
+    if (!yatraName) return 'Tour';
+    const name = yatraName.toLowerCase();
+    if (name.includes('same day')) return 'Same Day';
+    if (name.includes('1 day') || name.includes('one day')) return 'Same Day';
+    if (name.includes('camping')) return 'Camping';
+    if (name.includes('2 day') || name.includes('two day')) return '2 Days';
+    if (name.includes('3 day') || name.includes('three day')) return '3 Days';
+    if (name.includes('4 day') || name.includes('four day')) return '4 Days';
+    if (name.includes('5 day') || name.includes('five day')) return '5 Days';
+    return 'Tour';
+};
+
+// ============================================
+// GET TOUR STATUS
+// ============================================
+const getTourStatus = (startDate, endDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    if (end < today) return { label: 'COMPLETED', type: 'completed' };
+    if (start <= today && end >= today) return { label: 'ONGOING', type: 'ongoing' };
+    return { label: 'UPCOMING', type: 'upcoming' };
+};
+
+// ============================================
+// SUB-DESTINATION DATA
+// ============================================
+
+const getSubDestinations = (destination) => {
+    const subDestMap = {
+        'Vrindavan': [
+            { name: 'Same Day Vrindavan Darshan', icon: '🛕', price: '1,700', days: '1 Day' },
+            { name: '2 Days Barsana Vrindavan Yatra', icon: '🌸', price: '1,700', days: '2 Days' },
+        ],
+        'Khatu Shyam': [
+            { name: 'Same Day Khatu Shyam Darshan', icon: '🙏', price: '1,700', days: '1 Day' },
+            { name: '2 Days Khatu Shyam • Salasar Yatra', icon: '🚩', price: '1,700', days: '2 Days' },
+        ],
+        'Haridwar': [
+            { name: 'Same Day Haridwar Rishikesh Yatra', icon: '🌊', price: '1,000', days: '1 Day' },
+        ],
+        'Manali': [
+            { name: 'Manali • Sissu • Kasol • Manikaran Tour', icon: '🏔️', price: '4,500', days: '5 Days' },
+        ],
+    };
+    return subDestMap[destination] || null;
+};
+
+// ============================================
+// STYLED COMPONENTS
+// ============================================
+
+const PageContainer = styled.div`
+    padding-top: 160px;
+    padding-bottom: 100px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9edf5 100%);
+    min-height: 100vh;
+`;
+
+const Container = styled.div`
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+`;
+
+const PageHeader = styled.div`
+    text-align: center;
+    margin-bottom: 40px;
+    h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: ${colors.neutral[900]};
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+        .gradient-text {
+            background: ${colors.primary.gradient};
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    }
+    p {
+        color: ${colors.neutral[600]};
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    .badge-count {
+        display: inline-block;
+        background: linear-gradient(135deg, ${colors.primary.main}, ${colors.primary.dark});
+        color: #fff;
+        padding: 4px 20px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+`;
+
+const FilterBar = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 18px 24px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(255,255,255,0.3);
+`;
+
+const FilterGroup = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+`;
+
+const FilterInput = styled.input`
+    padding: 10px 16px;
+    border: 2px solid ${colors.neutral[200]};
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    background: #fff;
+    &:focus {
+        border-color: ${colors.primary.main};
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+`;
+
+const StatusDropdown = styled.select`
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 2px solid ${colors.primary.main};
+    font-size: 14px;
+    font-weight: 600;
+    background: #fff;
+    color: ${colors.neutral[700]};
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    display: ${props => props.visible ? 'inline-block' : 'none'};
+    &:focus {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+`;
+
+const ClearBtn = styled.button`
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid ${colors.neutral[200]};
+    border-radius: 12px;
+    color: ${colors.neutral[600]};
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    &:hover {
+        background: ${colors.neutral[100]};
+        border-color: ${colors.neutral[300]};
+        transform: translateY(-2px);
+    }
+`;
+
+const DestinationNav = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.3);
+`;
+
+const NavBtn = styled.button`
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: 2px solid ${props => props.active ? colors.primary.main : colors.neutral[200]};
+    background: ${props => props.active ? colors.primary.gradient : 'transparent'};
+    color: ${props => props.active ? '#fff' : colors.neutral[600]};
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: ${props => props.active ? '0 4px 15px rgba(79, 70, 229, 0.3)' : '0 2px 8px rgba(0,0,0,0.05)'};
+        border-color: ${props => props.active ? colors.primary.main : colors.primary.main};
+    }
+    .count {
+        background: ${props => props.active ? 'rgba(255,255,255,0.2)' : colors.neutral[200]};
+        color: ${props => props.active ? '#fff' : colors.neutral[500]};
+        padding: 1px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        margin-left: 6px;
+    }
+    .icon {
+        margin-right: 6px;
+    }
+`;
+
+const TripDetails = styled.div`
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.3);
+`;
+
+const HeroImage = styled.div`
+    width: 100%;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    background: ${colors.primary.gradient};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    color: #fff;
+    opacity: 0.8;
+    position: relative;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 24px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        color: #fff;
+        h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+    }
+`;
+
+const TripHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid ${colors.neutral[100]};
+    h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: ${colors.neutral[900]};
+        margin: 0;
+    }
+    .price-tag {
+        font-size: 2rem;
+        font-weight: 800;
+        color: ${colors.primary.main};
+        background: ${colors.primary.light};
+        padding: 8px 24px;
+        border-radius: 14px;
+    }
+`;
+
+const BadgeGroup = styled.div`
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+`;
+
+const Badge = styled.span`
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: ${props => props.bg || colors.primary.light};
+    color: ${props => props.color || colors.primary.main};
+`;
+
+const StatusBadge = styled(Badge)`
+    background: ${props => 
+        props.status === 'upcoming' ? '#22C55E' :
+        props.status === 'ongoing' ? '#F59E0B' : '#EF4444'
+    };
+    color: #fff;
+`;
+
+const SubDestSection = styled.div`
+    margin: 20px 0;
+    padding: 20px;
+    background: ${colors.neutral[50]};
+    border-radius: 16px;
+    border: 1px solid ${colors.neutral[200]};
+`;
+
+const SubDestTitle = styled.h3`
+    font-size: 1.1rem;
+    color: ${colors.neutral[700]};
+    text-align: center;
+    margin-bottom: 16px;
+`;
+
+const SubDestGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+`;
+
+const SubDestCard = styled.div`
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid ${colors.neutral[200]};
+    transition: all 0.3s ease;
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border-color: ${colors.primary.main};
+    }
+    .sub-icon { font-size: 36px; display: block; margin-bottom: 6px; }
+    .sub-name { font-weight: 700; font-size: 15px; color: ${colors.neutral[800]}; }
+    .sub-price { font-size: 20px; font-weight: 800; color: ${colors.primary.main}; margin: 6px 0; }
+    .sub-days { font-size: 13px; color: ${colors.neutral[500]}; }
+    .sub-btn {
+        margin-top: 12px;
+        padding: 8px 28px;
+        background: ${colors.primary.gradient};
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        &:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+    }
+`;
+
+const Highlights = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+    .highlight-item {
+        background: ${colors.neutral[50]};
+        padding: 14px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid ${colors.neutral[200]};
+        transition: all 0.3s ease;
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        .icon { font-size: 28px; display: block; }
+        .label { font-size: 13px; color: ${colors.neutral[600]}; margin-top: 4px; font-weight: 500; }
+    }
+`;
+
+const InfoBox = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+    padding: 20px;
+    background: ${colors.neutral[50]};
+    border-radius: 14px;
+    border: 1px solid ${colors.neutral[200]};
+`;
+
+const InfoItem = styled.div`
+    .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: ${colors.neutral[500]};
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .value {
+        font-size: 16px;
+        font-weight: 700;
+        color: ${colors.neutral[800]};
+    }
+`;
+
+const DateSelectorWrapper = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 20px 0;
+    padding: 16px 20px;
+    background: ${colors.neutral[50]};
+    border-radius: 14px;
+    border: 1px solid ${colors.neutral[200]};
+    align-items: center;
+`;
+
+const DateSelectorLabel = styled.span`
+    font-weight: 600;
+    color: ${colors.neutral[700]};
+    font-size: 14px;
+`;
+
+const DateSelector = styled.select`
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 2px solid ${colors.neutral[200]};
+    font-size: 14px;
+    font-weight: 500;
+    background: #fff;
+    color: ${colors.neutral[700]};
+    cursor: pointer;
+    outline: none;
+    min-width: 220px;
+    transition: all 0.3s ease;
+    &:focus {
+        border-color: ${colors.primary.main};
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+`;
+
+const LanguageToggle = styled.button`
+    padding: 8px 20px;
+    border-radius: 50px;
+    border: 2px solid ${colors.primary.main};
+    background: ${props => props.lang === 'hi' ? colors.primary.gradient : 'transparent'};
+    color: ${props => props.lang === 'hi' ? '#fff' : colors.primary.main};
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+    }
+`;
+
+const TabsWrapper = styled.div`
+    margin-top: 24px;
+`;
+
+const TabHeaders = styled.div`
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid ${colors.neutral[200]};
+    margin-bottom: 16px;
+    align-items: center;
+`;
+
+const TabBtn = styled.button`
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 15px;
+    color: ${props => props.active ? colors.primary.main : colors.neutral[500]};
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid ${props => props.active ? colors.primary.main : 'transparent'};
+    margin-bottom: -2px;
+    &:hover {
+        color: ${colors.primary.main};
+    }
+`;
+
+const TabContent = styled.div`
+    padding: 16px 0;
+    min-height: 120px;
+    color: ${colors.neutral[700]};
+    font-size: 15px;
+    line-height: 1.9;
+    p { margin: 8px 0; }
+    .section-title {
+        font-weight: 700;
+        font-size: 17px;
+        color: ${colors.neutral[900]};
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+    .day-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: ${colors.primary.main};
+        margin-top: 12px;
+        margin-bottom: 4px;
+    }
+`;
+
+const ActionButtons = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 2px solid ${colors.neutral[200]};
+    flex-wrap: wrap;
+`;
+
+const BookNowBtn = styled(Link)`
+    padding: 14px 44px;
+    background: ${colors.primary.gradient};
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+    }
+`;
+
+const WhatsAppInquiry = styled.a`
+    padding: 14px 34px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+    }
+`;
+
+const ShareBtn = styled.button`
+    padding: 14px 34px;
+    background: ${colors.neutral[100]};
+    color: ${colors.neutral[700]};
+    border: 2px solid ${colors.neutral[200]};
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        background: ${colors.neutral[200]};
+    }
+`;
+
+const FloatingWhatsApp = styled.a`
+    position: fixed;
+    bottom: 120px;
+    right: 24px;
+    background: #25D366;
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 25px rgba(37, 211, 102, 0.4);
+    z-index: 99;
+    transition: all 0.3s ease;
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 35px rgba(37, 211, 102, 0.5);
+    }
+`;
+
+const StickyBar = styled.div`
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 14px 24px;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 12px;
+    .sticky-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        .sticky-price {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: ${colors.primary.main};
+        }
+        .sticky-name {
+            font-weight: 600;
+            color: ${colors.neutral[700]};
+        }
+    }
+    .sticky-btn {
+        padding: 12px 36px;
+        background: ${colors.primary.gradient};
+        color: #fff;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+        }
+    }
+    @media (max-width: ${breakpoints.md}) {
+        .sticky-info .sticky-name { display: none; }
+    }
+`;
+
+const NoSelection = styled.div`
+    text-align: center;
+    padding: 80px 20px;
+    h2 {
+        font-size: 2rem;
+        color: ${colors.neutral[700]};
+        margin-bottom: 12px;
+    }
+    p {
+        color: ${colors.neutral[500]};
+        font-size: 1.1rem;
+    }
+    .icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+`;
+
+const SkeletonContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 20px 0;
+`;
+
+const SkeletonCard = styled.div`
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: ${shadows.sm};
+    animation: shimmer 1.5s ease-in-out infinite;
+    background: linear-gradient(
+        90deg,
+        ${colors.neutral[100]} 25%,
+        ${colors.neutral[200]} 50%,
+        ${colors.neutral[100]} 75%
+    );
+    background-size: 200% 100%;
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+`;
+
+const SkeletonLine = styled.div`
+    height: ${props => props.height || '16px'};
+    width: ${props => props.width || '100%'};
+    background: ${colors.neutral[200]};
+    border-radius: 8px;
+    margin-bottom: ${props => props.mb || '12px'};
+    opacity: 0.6;
+`;
+
+const SkeletonTitle = styled(SkeletonLine)`
+    height: 32px;
+    width: 60%;
+`;
+
+const SkeletonImage = styled.div`
+    height: 200px;
+    background: ${colors.neutral[200]};
+    border-radius: 12px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+`;
+
+const SkeletonBadge = styled.div`
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+`;
+
+const SkeletonBadgeItem = styled.div`
+    height: 24px;
+    width: 80px;
+    background: ${colors.neutral[200]};
+    border-radius: 20px;
+    opacity: 0.6;
+`;
+
+const SkeletonGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+    @media (max-width: ${breakpoints.md}) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+`;
+
+const BackToTopBtn = styled.button`
+    position: fixed;
+    bottom: 190px;
+    right: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: ${colors.primary.gradient};
+    color: #fff;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    z-index: 99;
+    transition: all 0.3s ease;
+    display: ${props => props.visible ? 'flex' : 'none'};
+    align-items: center;
+    justify-content: center;
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+    }
+`;
+
+const RelatedToursSection = styled.div`
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid ${colors.neutral[200]};
+    h3 {
+        font-size: 1.3rem;
+        color: ${colors.neutral[800]};
+        margin-bottom: 16px;
+    }
+`;
+
+const RelatedGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+`;
+
+const RelatedCard = styled.div`
+    background: ${colors.neutral[50]};
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid ${colors.neutral[200]};
+    text-align: center;
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border-color: ${colors.primary.main};
+    }
+    h4 {
+        font-size: 14px;
+        color: ${colors.neutral[800]};
+        margin: 8px 0 4px;
+    }
+    p {
+        font-size: 13px;
+        color: ${colors.neutral[600]};
+        margin: 0;
+    }
+    .related-image {
+        width: 100%;
+        height: 120px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: ${colors.neutral[200]};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+`;
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
+function Tours() {
+    const [yatras, setYatras] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedDestination, setSelectedDestination] = useState(null);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [activeTab, setActiveTab] = useState('itinerary');
+    const [showSticky, setShowSticky] = useState(true);
+    const [destinationImages, setDestinationImages] = useState({});
+    const [searchTerm, setSearchTerm] = useState('');
+    const [priceMin, setPriceMin] = useState('');
+    const [priceMax, setPriceMax] = useState('');
+    const [statusFilter, setStatusFilter] = useState('upcoming');
+    const [language, setLanguage] = useState('en');
+    const [showBackToTop, setShowBackToTop] = useState(false);
+
+    const loadDestinationImages = async (dests) => {
+        if (!dests || dests.length === 0) return;
+        const imageMap = {};
+        for (const dest of dests) {
+            try {
+                const result = await getDestinationImage(dest);
+                if (result && result.image_url) {
+                    imageMap[dest] = result.image_url;
+                }
+            } catch (err) {
+                console.error(`Error loading image for ${dest}:`, err);
+            }
+        }
+        setDestinationImages(imageMap);
+    };
+
+    useEffect(() => {
+        loadYatras();
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const footer = document.querySelector('footer');
+            if (footer) {
+                const footerRect = footer.getBoundingClientRect();
+                if (footerRect.top < window.innerHeight) {
+                    setShowSticky(false);
+                } else {
+                    setShowSticky(true);
+                }
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const handleBackToTopScroll = () => {
+            setShowBackToTop(window.scrollY > 400);
+        };
+        window.addEventListener('scroll', handleBackToTopScroll);
+        return () => window.removeEventListener('scroll', handleBackToTopScroll);
+    }, []);
+
+    const loadYatras = async () => {
+        try {
+            setLoading(true);
+            const data = await getYatras();
+            const enrichedData = data.map((yatra) => ({
+                ...yatra,
+                destination: extractDestination(yatra.yatra_name),
+                tripType: getTripType(yatra.yatra_name),
+                statusInfo: getTourStatus(yatra.start_date, yatra.end_date),
+                durationDays: yatra.start_date && yatra.end_date 
+                    ? Math.ceil((new Date(yatra.end_date) - new Date(yatra.start_date)) / (1000 * 60 * 60 * 24))
+                    : 0,
+            }));
+            setYatras(enrichedData);
+            if (enrichedData.length > 0) {
+                const upcomingTrips = enrichedData.filter(y => y.statusInfo.type === 'upcoming');
+                if (upcomingTrips.length > 0) {
+                    setSelectedTrip(upcomingTrips[0]);
+                } else {
+                    setSelectedTrip(enrichedData[0]);
+                }
+            }
+            setError(null);
+        } catch (err) {
+            console.error('Error loading yatras:', err);
+            setError('Failed to load yatras. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const destinations = useMemo(() => {
+        if (!yatras || yatras.length === 0) return [];
+        const destSet = new Set(yatras.map(y => y.destination));
+        return Array.from(destSet).sort();
+    }, [yatras]);
+
+    useEffect(() => {
+        if (destinations && destinations.length > 0) {
+            loadDestinationImages(destinations);
+        }
+    }, [destinations]);
+
+    const filteredYatras = useMemo(() => {
+        let filtered = [...yatras];
+        
+        // If a destination is selected, ONLY show that destination
+        if (selectedDestination) {
+            filtered = filtered.filter(y => y.destination === selectedDestination);
+        }
+        
+        if (searchTerm) {
+            filtered = filtered.filter(y => 
+                y.yatra_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                y.destination?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        if (priceMin) {
+            filtered = filtered.filter(y => y.rate_per_seat >= parseFloat(priceMin));
+        }
+        if (priceMax) {
+            filtered = filtered.filter(y => y.rate_per_seat <= parseFloat(priceMax));
+        }
+        if (!selectedDestination) {
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(y => y.statusInfo.type === statusFilter);
+            }
+        }
+        return filtered;
+    }, [yatras, searchTerm, priceMin, priceMax, statusFilter, selectedDestination]);
+
+    const handleAllDestinationsClick = () => {
+        setSelectedDestination(null);
+        setActiveTab('itinerary');
+        const trips = yatras.filter(y => y.statusInfo.type === statusFilter);
+        if (trips.length > 0) {
+            setSelectedTrip(trips[0]);
+        } else if (yatras.length > 0) {
+            setSelectedTrip(yatras[0]);
+        }
+    };
+
+    const handleDestinationClick = (destination) => {
+        setSelectedDestination(destination);
+        setActiveTab('itinerary');
+        const trips = yatras.filter(y => y.destination === destination);
+        if (trips.length > 0) {
+            setSelectedTrip(trips[0]);
+        }
+    };
+
+    const handleStatusChange = (status) => {
+        setStatusFilter(status);
+        if (!selectedDestination) {
+            setActiveTab('itinerary');
+            const trips = yatras.filter(y => y.statusInfo.type === status);
+            if (trips.length > 0) {
+                setSelectedTrip(trips[0]);
+            } else if (yatras.length > 0) {
+                setSelectedTrip(yatras[0]);
+            }
+        }
+    };
+
+    const handleDateChange = (e) => {
+        const tripId = parseInt(e.target.value);
+        if (!filteredYatras || filteredYatras.length === 0) return;
+        const trip = filteredYatras.find(t => t.id === tripId);
+        if (trip) {
+            setSelectedTrip(trip);
+        }
+    };
+
+    const handleShare = () => {
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({
+                title: selectedTrip?.yatra_name || 'GetMeYatra Tour',
+                text: `Check out ${selectedTrip?.yatra_name} on GetMeYatra!`,
+                url: url,
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+    };
+
+    const toggleLanguage = () => {
+        setLanguage(language === 'en' ? 'hi' : 'en');
+    };
+
+    const getTranslatedContent = (text) => {
+        if (!text) return text;
+        if (language === 'en') return text;
+        return translateText(text, 'hi');
+    };
+
+    const getDestinationIcon = (dest) => {
+        const icons = {
+            'Vrindavan': '🌸',
+            'Khatu Shyam': '🙏',
+            'Haridwar': '🌊',
+            'Manali': '🏔️',
+        };
+        return icons[dest] || '📍';
+    };
+
+    const getHeroContent = (destination) => {
+        const heroMap = {
+            'Vrindavan': { emoji: '🌸', bg: 'linear-gradient(135deg, #F093FB, #F5576C)' },
+            'Khatu Shyam': { emoji: '🙏', bg: 'linear-gradient(135deg, #FDCB6E, #E17055)' },
+            'Haridwar': { emoji: '🌊', bg: 'linear-gradient(135deg, #74B9FF, #0984E3)' },
+            'Manali': { emoji: '🏔️', bg: 'linear-gradient(135deg, #55EFC4, #00B894)' },
+        };
+        return heroMap[destination] || { emoji: '📍', bg: colors.primary.gradient };
+    };
+
+    const getHighlights = (trip) => {
+        const highlights = {
+            'Vrindavan': [
+                { icon: '🌸', label: 'Radha Rani Temple' },
+                { icon: '🛕', label: 'Banke Bihari Darshan' },
+                { icon: '🙏', label: 'Prem Anand Maharaj' },
+                { icon: '🌿', label: 'Nidhivan & Prem Mandir' },
+            ],
+            'Khatu Shyam': [
+                { icon: '🙏', label: 'Khatu Shyam Darshan' },
+                { icon: '🛕', label: 'Salasar Balaji' },
+                { icon: '🌹', label: 'Rani Sati Dadi' },
+                { icon: '🎶', label: 'Bhajan Kirtan' },
+            ],
+            'Haridwar': [
+                { icon: '🌊', label: 'Ganga Aarti' },
+                { icon: '🛕', label: 'Mansa Devi' },
+                { icon: '🌉', label: 'Ram Jhula' },
+                { icon: '🙏', label: 'Triveni Ghat' },
+            ],
+            'Manali': [
+                { icon: '🏔️', label: 'Snow View' },
+                { icon: '🚇', label: 'Atal Tunnel' },
+                { icon: '🌲', label: 'Kasol & Manikaran' },
+                { icon: '🔥', label: 'Bonfire & DJ' },
+            ],
+        };
+        return highlights[trip?.destination] || [
+            { icon: '🌟', label: 'Spiritual Journey' },
+            { icon: '🙏', label: 'Blessings' },
+            { icon: '🌸', label: 'Divine Experience' },
+        ];
+    };
+
+    if (loading) {
+        return (
+            <PageContainer>
+                <Container>
+                    <PageHeader>
+                        <h1>🚌 Our <span className="gradient-text">Yatra / Tour</span> Packages</h1>
+                        <p>Loading amazing tours for you...</p>
+                    </PageHeader>
+                    <SkeletonContainer>
+                        {[1, 2, 3].map((i) => (
+                            <SkeletonCard key={i}>
+                                <SkeletonImage />
+                                <SkeletonTitle />
+                                <SkeletonLine width="80%" />
+                                <SkeletonBadge>
+                                    <SkeletonBadgeItem />
+                                    <SkeletonBadgeItem />
+                                    <SkeletonBadgeItem />
+                                </SkeletonBadge>
+                                <SkeletonGrid>
+                                    <SkeletonLine height="50px" />
+                                    <SkeletonLine height="50px" />
+                                    <SkeletonLine height="50px" />
+                                    <SkeletonLine height="50px" />
+                                </SkeletonGrid>
+                                <SkeletonLine width="30%" />
+                            </SkeletonCard>
+                        ))}
+                    </SkeletonContainer>
+                </Container>
+            </PageContainer>
+        );
+    }
+
+    if (error) {
+        return (
+            <PageContainer>
+                <Container>
+                    <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+                        <p style={{ color: colors.status.error }}>{error}</p>
+                        <button 
+                            onClick={loadYatras}
+                            style={{
+                                marginTop: '16px',
+                                padding: '10px 32px',
+                                background: colors.primary.gradient,
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </Container>
+            </PageContainer>
+        );
+    }
+
+    const heroContent = selectedDestination ? getHeroContent(selectedDestination) : null;
+    const highlights = selectedTrip ? getHighlights(selectedTrip) : [];
+    const tripCount = filteredYatras.length;
+    const totalCount = yatras.length;
+    const upcomingCount = yatras.filter(y => y.statusInfo.type === 'upcoming').length;
+    const ongoingCount = yatras.filter(y => y.statusInfo.type === 'ongoing').length;
+    const completedCount = yatras.filter(y => y.statusInfo.type === 'completed').length;
+    const destCounts = {};
+    destinations.forEach(dest => {
+        destCounts[dest] = yatras.filter(y => y.destination === dest).length;
+    });
+
+    return (
+        <PageContainer>
+            <Container>
+                <PageHeader>
+                    <h1>🚌 Our <span className="gradient-text">Yatra / Tour</span> Packages</h1>
+                    <p>Select a destination or filter by status to view trip details</p>
+                    <span className="badge-count">
+                        {filteredYatras.length} {filteredYatras.length === 1 ? 'Tour' : 'Tours'} Available
+                    </span>
+                </PageHeader>
+
+                <FilterBar>
+                    <FilterGroup>
+                        <FilterInput
+                            type="text"
+                            placeholder={getTranslatedContent('Search tours...')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ minWidth: '180px' }}
+                        />
+                    </FilterGroup>
+                    <FilterGroup>
+                        <FilterInput
+                            type="number"
+                            placeholder={getTranslatedContent('Min ₹')}
+                            value={priceMin}
+                            onChange={(e) => setPriceMin(e.target.value)}
+                            style={{ width: '90px' }}
+                        />
+                        <span style={{ color: colors.neutral[400] }}>-</span>
+                        <FilterInput
+                            type="number"
+                            placeholder={getTranslatedContent('Max ₹')}
+                            value={priceMax}
+                            onChange={(e) => setPriceMax(e.target.value)}
+                            style={{ width: '90px' }}
+                        />
+                    </FilterGroup>
+                    <FilterGroup>
+                        <StatusDropdown 
+                            value={statusFilter} 
+                            onChange={(e) => handleStatusChange(e.target.value)}
+                            visible={!selectedDestination}
+                        >
+                            <option value="upcoming">🟢 {getTranslatedContent('Upcoming')} ({upcomingCount})</option>
+                            <option value="ongoing">🟡 {getTranslatedContent('Ongoing')} ({ongoingCount})</option>
+                            <option value="completed">🔴 {getTranslatedContent('Completed')} ({completedCount})</option>
+                            <option value="all">🌐 {getTranslatedContent('All Tours')} ({totalCount})</option>
+                        </StatusDropdown>
+                    </FilterGroup>
+                    <FilterGroup>
+                        <span style={{ fontSize: '14px', color: colors.neutral[500], fontWeight: 500 }}>
+                            {tripCount} {tripCount === 1 ? getTranslatedContent('tour found') : getTranslatedContent('tours found')}
+                        </span>
+                    </FilterGroup>
+                    <FilterGroup>
+                        <ClearBtn
+                            onClick={() => {
+                                setSearchTerm('');
+                                setPriceMin('');
+                                setPriceMax('');
+                                setStatusFilter('upcoming');
+                                setSelectedDestination(null);
+                            }}
+                        >
+                            ✕ {getTranslatedContent('Clear Filters')}
+                        </ClearBtn>
+                    </FilterGroup>
+                </FilterBar>
+
+                <DestinationNav>
+                    <NavBtn
+                        active={!selectedDestination}
+                        onClick={handleAllDestinationsClick}
+                    >
+                        🌐 {getTranslatedContent('All Destinations')}
+                        <span className="count">{filteredYatras.length}</span>
+                    </NavBtn>
+                    {destinations.map(dest => {
+                        const count = destCounts[dest] || 0;
+                        const icon = getDestinationIcon(dest);
+                        return (
+                            <NavBtn
+                                key={dest}
+                                active={selectedDestination === dest}
+                                onClick={() => handleDestinationClick(dest)}
+                            >
+                                <span className="icon">{icon}</span>
+                                {getTranslatedContent(dest)}
+                                <span className="count">{count}</span>
+                            </NavBtn>
+                        );
+                    })}
+                </DestinationNav>
+
+                {selectedTrip ? (
+                    <TripDetails>
+                        <HeroImage style={{ background: heroContent?.bg || colors.primary.gradient }}>
+                            {destinationImages && destinationImages[selectedTrip.destination] ? (
+                                <img 
+                                    src={`http://getmeyatra.com${destinationImages[selectedTrip.destination]}`} 
+                                    alt={selectedTrip.destination}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        const parent = e.target.parentElement;
+                                        if (parent) {
+                                            const span = document.createElement('span');
+                                            span.style.cssText = 'font-size:80px;opacity:0.6;';
+                                            span.textContent = heroContent?.emoji || '📍';
+                                            parent.appendChild(span);
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <span style={{ fontSize: '80px', opacity: 0.6 }}>{heroContent?.emoji || '📍'}</span>
+                            )}
+                            <div className="overlay">
+                                <h2>{getTranslatedContent(selectedTrip.destination)}</h2>
+                                {selectedTrip.start_time && (
+                                    <p style={{ margin: '4px 0 0', fontSize: '0.9rem', opacity: 0.9 }}>
+                                        🕐 {getTranslatedContent('Start Time')}: {formatTime(selectedTrip.start_time)} | {getTranslatedContent('Return Time')}: {selectedTrip.return_time || 'TBD'}
+                                    </p>
+                                )}
+                            </div>
+                        </HeroImage>
+
+                        <TripHeader>
+                            <div>
+                                <h2>{getTranslatedContent(selectedTrip.yatra_name)}</h2>
+                                <BadgeGroup>
+                                    <Badge>{getTranslatedContent(selectedTrip.tripType)}</Badge>
+                                    <StatusBadge status={selectedTrip.statusInfo.type}>
+                                        {getTranslatedContent(selectedTrip.statusInfo.label)}
+                                    </StatusBadge>
+                                    {selectedTrip.start_time && (
+                                        <Badge bg="#E0E7FF" color="#4338CA">
+                                            🕐 {formatTime(selectedTrip.start_time)}
+                                        </Badge>
+                                    )}
+                                </BadgeGroup>
+                            </div>
+                            <div className="price-tag">
+                                ₹{selectedTrip.rate_per_seat}
+                            </div>
+                        </TripHeader>
+
+                        {selectedTrip && getSubDestinations(selectedTrip.destination) && (
+                            <SubDestSection>
+                                <SubDestTitle>
+                                    ✨ {getTranslatedContent('Available Tours in')} {getTranslatedContent(selectedTrip.destination)}
+                                </SubDestTitle>
+                                <SubDestGrid>
+                                    {getSubDestinations(selectedTrip.destination).map((sub, index) => (
+                                        <SubDestCard key={index}>
+                                            <span className="sub-icon">{sub.icon}</span>
+                                            <div className="sub-name">{getTranslatedContent(sub.name)}</div>
+                                            <div className="sub-price">₹{sub.price}</div>
+                                            <div className="sub-days">📅 {getTranslatedContent(sub.days)}</div>
+                                            <button 
+                                                className="sub-btn"
+                                                onClick={() => {
+                                                    const foundTrip = yatras.find(t => t.yatra_name === sub.name);
+                                                    if (foundTrip) {
+                                                        setSelectedTrip(foundTrip);
+                                                        setActiveTab('itinerary');
+                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                    } else {
+                                                        alert(
+                                                            `${sub.name}\n\n` +
+                                                            `💰 Price: ₹${sub.price}\n` +
+                                                            `📅 Duration: ${sub.days}\n\n` +
+                                                            `📞 For Booking:\n` +
+                                                            `8010320000 | 9015154545 | 9312113322`
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                {getTranslatedContent('View Details')}
+                                            </button>
+                                        </SubDestCard>
+                                    ))}
+                                </SubDestGrid>
+                            </SubDestSection>
+                        )}
+
+                        <Highlights>
+                            {highlights && highlights.length > 0 ? (
+                                highlights.map((item, index) => (
+                                    <div key={index} className="highlight-item">
+                                        <span className="icon">{item.icon}</span>
+                                        <div className="label">{getTranslatedContent(item.label)}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>{getTranslatedContent('No highlights available')}</p>
+                            )}
+                        </Highlights>
+
+                        <InfoBox>
+                            <InfoItem>
+                                <div className="label">{getTranslatedContent('Trip Type')}</div>
+                                <div className="value">{getTranslatedContent(selectedTrip.tripType)}</div>
+                            </InfoItem>
+                            <InfoItem>
+                                <div className="label">{getTranslatedContent('Price')}</div>
+                                <div className="value">₹{selectedTrip.rate_per_seat} / {getTranslatedContent('seat')}</div>
+                            </InfoItem>
+                            <InfoItem>
+                                <div className="label">{getTranslatedContent('Duration')}</div>
+                                <div className="value">{selectedTrip.durationDays} {getTranslatedContent('Days')}</div>
+                            </InfoItem>
+                            {selectedTrip.start_time && (
+                                <InfoItem>
+                                    <div className="label">⏰ {getTranslatedContent('Start Time')}</div>
+                                    <div className="value">{formatTime(selectedTrip.start_time)}</div>
+                                </InfoItem>
+                            )}
+                            {selectedTrip.return_time && (
+                                <InfoItem>
+                                    <div className="label">⏰ {getTranslatedContent('Return Time')}</div>
+                                    <div className="value">{selectedTrip.return_time}</div>
+                                </InfoItem>
+                            )}
+                            <InfoItem>
+                                <div className="label">{getTranslatedContent('Trip Count')}</div>
+                                <div className="value">{selectedTrip.trip_count || 0} {getTranslatedContent('trips')}</div>
+                            </InfoItem>
+                        </InfoBox>
+
+                        {/* ===== FIXED DATE SELECTOR - ONLY SHOWS SELECTED DESTINATION TOURS ===== */}
+                        {selectedDestination && (() => {
+                            // Get ONLY tours for the selected destination
+                            const destinationTrips = yatras.filter(y => y.destination === selectedDestination);
+                            
+                            return destinationTrips && destinationTrips.length > 1 && (
+                                <DateSelectorWrapper>
+                                    <DateSelectorLabel>{getTranslatedContent('Select Date')}:</DateSelectorLabel>
+                                    <DateSelector 
+                                        value={selectedTrip.id}
+                                        onChange={handleDateChange}
+                                    >
+                                        {destinationTrips.map(trip => (
+                                            <option key={trip.id} value={trip.id}>
+                                                {formatDateRange(trip.start_date, trip.end_date)}
+                                                {trip.start_time && ` (${formatTime(trip.start_time)})`}
+                                            </option>
+                                        ))}
+                                    </DateSelector>
+                                </DateSelectorWrapper>
+                            );
+                        })()}
+
+                        <TabsWrapper>
+                            <TabHeaders>
+                                <TabBtn active={activeTab === 'itinerary'} onClick={() => setActiveTab('itinerary')}>
+                                    📅 {getTranslatedContent('Itinerary')}
+                                </TabBtn>
+                                <TabBtn active={activeTab === 'inclusions'} onClick={() => setActiveTab('inclusions')}>
+                                    ✅ {getTranslatedContent('Inclusions')}
+                                </TabBtn>
+                                <TabBtn active={activeTab === 'exclusions'} onClick={() => setActiveTab('exclusions')}>
+                                    ❌ {getTranslatedContent('Exclusions')}
+                                </TabBtn>
+                                <TabBtn active={activeTab === 'notes'} onClick={() => setActiveTab('notes')}>
+                                    📝 {getTranslatedContent('Notes')}
+                                </TabBtn>
+                                <LanguageToggle lang={language} onClick={toggleLanguage}>
+                                    {language === 'en' ? '🇮🇳 हिंदी' : '🇬🇧 English'}
+                                </LanguageToggle>
+                            </TabHeaders>
+
+                            <TabContent>
+                                {activeTab === 'itinerary' && (
+                                    selectedTrip.description ? (
+                                        selectedTrip.description.split('\n').map((line, index) => {
+                                            const trimmed = line.trim();
+                                            if (!trimmed) return <br key={index} />;
+                                            const isDay = trimmed.match(/^📅 Day \d+/i) || trimmed.match(/^Day \d+/i);
+                                            const isTime = trimmed.match(/^🕐|^🕔|^🕕|^🕗|^🕘|^🕙/);
+                                            const isLocation = trimmed.match(/^📍/);
+                                            const isHighlight = trimmed.match(/^✨/);
+                                            
+                                            let style = {};
+                                            if (isDay) {
+                                                style = { fontWeight: 700, fontSize: '17px', color: colors.primary.main, marginTop: '12px', marginBottom: '4px' };
+                                            } else if (isTime) {
+                                                style = { fontWeight: 600, color: colors.neutral[700], marginTop: '4px' };
+                                            } else if (isLocation) {
+                                                style = { fontWeight: 600, color: colors.neutral[800], marginTop: '6px' };
+                                            } else if (isHighlight) {
+                                                style = { fontWeight: 600, color: colors.primary.main, marginTop: '8px' };
+                                            } else {
+                                                style = { margin: '2px 0', paddingLeft: trimmed.match(/^•/) ? '20px' : '0' };
+                                            }
+                                            
+                                            const translated = getTranslatedContent(trimmed);
+                                            return <p key={index} style={style}>{translated}</p>;
+                                        })
+                                    ) : (
+                                        <p>{getTranslatedContent('No itinerary available')}</p>
+                                    )
+                                )}
+                                {activeTab === 'inclusions' && (
+                                    <div>
+                                        <p className="section-title">✅ {getTranslatedContent("What's Included")}:</p>
+                                        <p>{getTranslatedContent('• AC Bus / Tempo Traveller Transport')}</p>
+                                        <p>{getTranslatedContent('• Hotel Stay (as per package)')}</p>
+                                        <p>{getTranslatedContent('• Meals as per itinerary')}</p>
+                                        <p>{getTranslatedContent('• Sightseeing as per itinerary')}</p>
+                                        <p>{getTranslatedContent('• Experienced Tour Coordinator')}</p>
+                                        <p>{getTranslatedContent('• Mineral Water')}</p>
+                                        <p>{getTranslatedContent('• All taxes included')}</p>
+                                    </div>
+                                )}
+                                {activeTab === 'exclusions' && (
+                                    <div>
+                                        <p className="section-title">❌ {getTranslatedContent("What's Not Included")}:</p>
+                                        <p>{getTranslatedContent('• Personal expenses')}</p>
+                                        <p>{getTranslatedContent('• Adventure activities (if any)')}</p>
+                                        <p>{getTranslatedContent('• Any meals not mentioned')}</p>
+                                        <p>{getTranslatedContent('• Travel insurance')}</p>
+                                    </div>
+                                )}
+                                {activeTab === 'notes' && (
+                                    <div>
+                                        <p className="section-title">📝 {getTranslatedContent('Important Notes')}:</p>
+                                        <p>{getTranslatedContent('• Carry warm clothes (if needed)')}</p>
+                                        <p>{getTranslatedContent('• Carry ID proof (Aadhar/Driving License)')}</p>
+                                        <p>{getTranslatedContent('• Carry medication if needed')}</p>
+                                        <p>{getTranslatedContent('• Follow group timings')}</p>
+                                        <p>{getTranslatedContent('• Respect local customs and traditions')}</p>
+                                    </div>
+                                )}
+                            </TabContent>
+                        </TabsWrapper>
+
+                        <ActionButtons>
+                            <BookNowBtn to={`/booking?yatra=${selectedTrip.id}`}>
+                                {getTranslatedContent('Book Now')} → ₹{selectedTrip.rate_per_seat}
+                            </BookNowBtn>
+                            <WhatsAppInquiry 
+                                href={`https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20${encodeURIComponent(selectedTrip.yatra_name)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                💬 {getTranslatedContent('WhatsApp Inquiry')}
+                            </WhatsAppInquiry>
+                            <ShareBtn onClick={handleShare}>
+                                📤 {getTranslatedContent('Share')}
+                            </ShareBtn>
+                        </ActionButtons>
+
+                        {filteredYatras && filteredYatras.length > 1 && selectedTrip && (
+                            <RelatedToursSection>
+                                <h3>🔄 {getTranslatedContent('Similar Tours You Might Like')}</h3>
+                                <RelatedGrid>
+                                    {filteredYatras
+                                        .filter(t => t.id !== selectedTrip.id)
+                                        .slice(0, 3)
+                                        .map(trip => (
+                                            <RelatedCard 
+                                                key={trip.id}
+                                                onClick={() => {
+                                                    setSelectedTrip(trip);
+                                                    setActiveTab('itinerary');
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                            >
+                                                <div className="related-image">
+                                                    <span>{getDestinationIcon(trip.destination)}</span>
+                                                </div>
+                                                <h4>{getTranslatedContent(trip.yatra_name)}</h4>
+                                                <p>₹{trip.rate_per_seat} • {trip.durationDays} Days</p>
+                                            </RelatedCard>
+                                        ))
+                                    }
+                                </RelatedGrid>
+                            </RelatedToursSection>
+                        )}
+                    </TripDetails>
+                ) : (
+                    <NoSelection>
+                        <div className="icon">🔍</div>
+                        <h2>{getTranslatedContent('No trips available')}</h2>
+                        <p>{getTranslatedContent('Please select a different destination or check back later.')}</p>
+                    </NoSelection>
+                )}
+            </Container>
+
+            <FloatingWhatsApp 
+                href="https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20your%20tours"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                💬
+            </FloatingWhatsApp>
+
+            <BackToTopBtn 
+                visible={showBackToTop}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+                ↑
+            </BackToTopBtn>
+
+            {showSticky && selectedTrip && (
+                <StickyBar>
+                    <div className="sticky-info">
+                        <span className="sticky-price">₹{selectedTrip.rate_per_seat}</span>
+                        <span className="sticky-name">| {getTranslatedContent(selectedTrip.yatra_name)}</span>
+                    </div>
+                    <Link to={`/booking?yatra=${selectedTrip.id}`} className="sticky-btn">
+                        {getTranslatedContent('Book Now')} →
+                    </Link>
+                </StickyBar>
+            )}
+        </PageContainer>
+    );
+}
+
+export default Tours;

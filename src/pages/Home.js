@@ -1,981 +1,764 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom';
-import { getYatras } from '../services/api';
-import { colors, shadows, breakpoints } from '../styles/theme';
+import { Link } from 'react-router-dom';
+import { getYatras, getHomeSettings } from '../services/api';
+import { colors, breakpoints } from '../styles/theme';
 
 // ============================================
-// STYLED COMPONENTS
+// STYLED COMPONENTS - PREMIUM & ATTRACTIVE
 // ============================================
 
 const PageContainer = styled.div`
-  padding-top: 160px;
-  background: ${colors.background.main};
+  padding-top: 80px;
+  background: #ffffff;
   min-height: 100vh;
   overflow-x: hidden;
 `;
 
-// ===== HERO BUTTONS =====
-const HeroButtons = styled.div`
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
+const ScrollProgress = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4F46E5, #7C3AED, #EC4899);
+  z-index: 9999;
+  width: ${props => props.progress}%;
+  transition: width 0.1s ease;
 `;
 
-const HeroButton = styled(Link)`
-  padding: 14px 36px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 16px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+// ============================================
+// HERO SECTION - UNCHANGED
+// ============================================
 
-  &.primary {
-    background: #fff;
-    color: ${colors.primary.main};
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  &.secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-3px);
-    }
-  }
-`;
-
-// ===== HERO SLIDER =====
-const HeroSlider = styled.section`
-  min-height: 70vh;
+const HeroSection = styled.section`
+  height: 90vh;
+  min-height: 700px;
+  max-height: 900px;
   position: relative;
   overflow: hidden;
   margin-bottom: 60px;
-  border-radius: 0 0 40px 40px;
+  border-radius: 0 0 50px 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const SlideContainer = styled.div`
+const SliderContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;
+
+const SliderWrapper = styled.div`
   display: flex;
-  transition: transform 0.8s ease-in-out;
-  transform: translateX(${props => props.currentIndex * -100}%);
-  height: 70vh;
-  min-height: 500px;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const Slide = styled.div`
   min-width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${props => props.bg || 'linear-gradient(135deg, rgba(79, 70, 229, 0.85) 0%, rgba(124, 58, 237, 0.85) 100%)'};
   position: relative;
-  color: #fff;
-  padding: 60px 20px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   &::after {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 100px;
-    background: linear-gradient(to top, ${colors.background.main}, transparent);
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%);
+  }
+`;
+
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  color: #fff;
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  animation: fadeInUp 1s ease-out;
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const HeroBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22C55E;
+    animation: pulse 2s infinite;
   }
 
-  .slide-content {
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    text-align: center;
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+`;
 
-    h1 {
-      font-size: 3.5rem;
-      font-weight: 900;
-      line-height: 1.2;
-      margin-bottom: 16px;
+const HeroTitle = styled.h1`
+  font-size: 4.5rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+  line-height: 1.1;
 
-      .highlight {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 4px 16px;
-        border-radius: 12px;
-        display: inline-block;
-      }
-    }
+  .highlight {
+    background: linear-gradient(135deg, #FCD34D, #F59E0B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    p {
-      font-size: 1.2rem;
-      opacity: 0.95;
-      max-width: 600px;
-      margin: 0 auto 32px;
-      line-height: 1.6;
+  @media (max-width: ${breakpoints.md}) {
+    font-size: 2.8rem;
+  }
+  @media (max-width: ${breakpoints.sm}) {
+    font-size: 2rem;
+  }
+`;
+
+const HeroSubtitle = styled.p`
+  font-size: 1.2rem;
+  max-width: 650px;
+  margin: 0 auto 28px;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.9);
+  font-weight: 300;
+
+  @media (max-width: ${breakpoints.md}) {
+    font-size: 1rem;
+  }
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 800px;
+  margin: 0 auto 28px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 8px;
+  border-radius: 60px;
+  border: 1px solid rgba(255,255,255,0.12);
+
+  input, select {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+
+    &::placeholder { color: rgba(255,255,255,0.5); }
+    option { color: #333; }
+  }
+
+  .search-btn {
+    padding: 14px 40px;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 25px rgba(79,70,229,0.4);
     }
   }
 
   @media (max-width: ${breakpoints.md}) {
-    .slide-content h1 {
-      font-size: 2.5rem;
+    border-radius: 20px;
+    padding: 16px;
+    flex-direction: column;
+    input, select { width: 100%; }
+    .search-btn { width: 100%; justify-content: center; }
+  }
+`;
+
+const HeroButtons = styled.div`
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+`;
+
+const HeroButton = styled(Link)`
+  padding: 16px 44px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &.primary {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: #fff;
+    box-shadow: 0 4px 30px rgba(79,70,229,0.4);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 40px rgba(79,70,229,0.5);
+      &::before { left: 100%; }
+    }
+  }
+
+  &.secondary {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255,255,255,0.2);
+
+    &:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-3px);
     }
   }
 `;
 
-const SlideDots = styled.div`
+const HeroStats = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+
+  .stat {
+    text-align: center;
+
+    .number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px;
+    }
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    gap: 16px;
+    .stat .number { font-size: 1.4rem; }
+    .stat .label { font-size: 10px; }
+    .stat .icon { font-size: 18px; }
+  }
+`;
+
+// ============================================
+// SLIDER CONTROLS - UNCHANGED
+// ============================================
+
+const SliderDots = styled.div`
   position: absolute;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 12px;
-  z-index: 10;
+  z-index: 20;
 `;
 
 const Dot = styled.button`
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  background: ${props => props.active ? '#fff' : 'transparent'};
+  border: 2px solid rgba(255,255,255,0.5);
+  background: ${props => props.active ? '#fff' : 'rgba(255,255,255,0.15)'};
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
 
-  &:hover {
-    transform: scale(1.2);
-  }
+  &:hover { transform: scale(1.3); }
 `;
 
-const SlideArrow = styled.button`
+const SliderArrow = styled.button`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: none;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
   color: #fff;
-  font-size: 24px;
-  width: 50px;
-  height: 50px;
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  font-size: 20px;
   cursor: pointer;
+  z-index: 20;
   transition: all 0.3s ease;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.4);
-    transform: translateY(-50%) scale(1.1);
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-50%) scale(1.05);
   }
 
-  &.prev { left: 20px; }
-  &.next { right: 20px; }
+  &.prev { left: 16px; }
+  &.next { right: 16px; }
 
   @media (max-width: ${breakpoints.md}) {
-    display: none;
+    width: 36px; height: 36px; font-size: 16px;
+    &.prev { left: 10px; }
+    &.next { right: 10px; }
   }
 `;
 
-// ===== SEARCH BAR =====
-const SearchSection = styled.div`
-  max-width: 800px;
-  margin: -30px auto 40px;
-  padding: 0 20px;
-  position: relative;
-  z-index: 5;
-`;
+// ============================================
+// SECTION HEADER - PREMIUM
+// ============================================
 
-const SearchBox = styled.div`
-  background: ${colors.background.card};
-  border-radius: 60px;
-  padding: 8px;
-  box-shadow: ${shadows.xl};
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 2px solid ${colors.neutral[200]};
-  transition: all 0.3s ease;
-
-  &:focus-within {
-    border-color: ${colors.primary.main};
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-  }
-
-  input {
-    flex: 1;
-    padding: 14px 20px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    background: transparent;
-    color: ${colors.neutral[700]};
-    min-width: 0;
-
-    &::placeholder {
-      color: ${colors.neutral[400]};
-    }
-  }
-
-  button {
-    padding: 12px 28px;
-    background: ${colors.primary.gradient};
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-    }
-  }
-
-  @media (max-width: ${breakpoints.sm}) {
-    flex-direction: column;
-    border-radius: 20px;
-    padding: 16px;
-    button { width: 100%; }
-  }
-`;
-
-// ===== STATS SECTION =====
-const StatsSection = styled.section`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-
-  @media (max-width: ${breakpoints.md}) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (max-width: ${breakpoints.sm}) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StatCard = styled.div`
-  background: ${colors.background.card};
-  padding: 24px;
-  border-radius: 16px;
+const SectionHeader = styled.div`
   text-align: center;
-  box-shadow: ${shadows.lg};
-  transition: all 0.3s ease;
+  margin-bottom: 48px;
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${shadows.xl};
-  }
-
-  .number {
-    font-size: 2.4rem;
-    font-weight: 800;
+  .badge {
+    display: inline-block;
+    padding: 6px 20px;
+    background: rgba(79,70,229,0.08);
     color: ${colors.primary.main};
-    display: block;
-  }
-  .label {
-    color: ${colors.neutral[600]};
-    font-size: 14px;
-    margin-top: 4px;
-  }
-`;
-
-// ===== WHY CHOOSE US =====
-const WhySection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-`;
-
-const WhyGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 24px;
-`;
-
-const WhyCard = styled.div`
-  background: ${colors.background.card};
-  padding: 30px 24px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: ${shadows.sm};
-  border: 1px solid ${colors.neutral[200]};
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${shadows.md};
-    border-color: ${colors.primary.main};
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
   }
 
-  .icon {
-    font-size: 40px;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
+  h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
     color: ${colors.neutral[900]};
     margin-bottom: 8px;
+
+    .gradient-text {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
   }
 
   p {
-    font-size: 14px;
-    color: ${colors.neutral[600]};
-    line-height: 1.6;
+    color: ${colors.neutral[500]};
+    font-size: 1.05rem;
+    max-width: 550px;
+    margin: 0 auto;
   }
+
+  @media (max-width: ${breakpoints.md}) {
+    h2 { font-size: 2rem; }
+    margin-bottom: 32px;
+  }
+`;
+
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 // ============================================
-// NEW: FEATURED DESTINATION CARDS
+// 1. TRUST BADGES - PREMIUM
 // ============================================
 
-const DestSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-`;
-
-const DestGrid = styled.div`
+const TrustBadges = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-`;
-
-const DestCard = styled.div`
-  background: ${colors.background.card};
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: ${shadows.md};
-  transition: all 0.3s ease;
-  border: 1px solid ${colors.neutral[200]};
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: ${shadows.xl};
-    border-color: ${colors.primary.main};
-  }
-
-  .dest-image {
-    height: 200px;
-    background: ${props => props.bg || colors.primary.gradient};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 64px;
-    color: #fff;
-    opacity: 0.7;
-    position: relative;
-
-    .dest-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 16px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.5));
-      
-      .dest-name {
-        color: #fff;
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin: 0;
-      }
-    }
-  }
-
-  .dest-content {
-    padding: 16px;
-
-    .dest-price {
-      font-weight: 700;
-      color: ${colors.primary.main};
-      font-size: 1.1rem;
-    }
-
-    .dest-tours {
-      font-size: 13px;
-      color: ${colors.neutral[600]};
-      margin-bottom: 8px;
-    }
-
-    .dest-btn {
-      display: inline-block;
-      padding: 8px 20px;
-      background: ${colors.primary.gradient};
-      color: #fff;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 13px;
-      text-decoration: none;
-      transition: all 0.3s ease;
-
-      &:hover {
-        transform: scale(1.05);
-      }
-    }
-  }
-`;
-
-// ===== UPCOMING TOURS =====
-const UpcomingSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-`;
-
-const UpcomingGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-`;
-
-const UpcomingCard = styled(Link)`
-  background: ${colors.background.card};
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: ${shadows.md};
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: ${colors.neutral[900]};
-  border: 1px solid ${colors.neutral[200]};
-  position: relative;
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: ${shadows.xl};
-    border-color: ${colors.primary.main};
-  }
-
-  .upcoming-image {
-    height: 180px;
-    background: ${colors.primary.gradient};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: #fff;
-    opacity: 0.6;
-    overflow: hidden;
-    position: relative;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .upcoming-content {
-    padding: 16px;
-
-    h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    p {
-      font-size: 13px;
-      color: ${colors.neutral[600]};
-      margin-bottom: 8px;
-    }
-
-    .upcoming-price {
-      font-weight: 700;
-      color: ${colors.primary.main};
-      font-size: 1.1rem;
-    }
-
-    .upcoming-date {
-      display: inline-block;
-      background: ${colors.primary.light};
-      color: ${colors.primary.main};
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 12px;
-      border-radius: 20px;
-      margin-bottom: 8px;
-    }
-  }
-
-  .countdown-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(239, 68, 68, 0.9);
-    color: #fff;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-`;
-
-// ===== FEATURED TOURS =====
-const FeaturedSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-`;
-
-const FeaturedGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-`;
-
-const FeaturedCard = styled(Link)`
-  background: ${colors.background.card};
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: ${shadows.md};
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: ${colors.neutral[900]};
-  border: 1px solid ${colors.neutral[200]};
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: ${shadows.xl};
-    border-color: ${colors.primary.main};
-  }
-
-  .featured-image {
-    height: 180px;
-    background: ${colors.primary.gradient};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: #fff;
-    opacity: 0.6;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .featured-content {
-    padding: 16px;
-
-    h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    p {
-      font-size: 13px;
-      color: ${colors.neutral[600]};
-      margin-bottom: 8px;
-    }
-
-    .featured-price {
-      font-weight: 700;
-      color: ${colors.primary.main};
-      font-size: 1.1rem;
-    }
-
-    .featured-badge {
-      display: inline-block;
-      background: ${colors.primary.gradient};
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 20px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-`;
-
-// ===== TESTIMONIALS =====
-const TestimonialSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  padding: 0 20px;
-`;
-
-const TestimonialGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-`;
-
-const TestimonialCard = styled.div`
-  background: ${colors.background.card};
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: ${shadows.sm};
-  border: 1px solid ${colors.neutral[200]};
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${shadows.md};
-  }
-
-  .stars {
-    color: #f59e0b;
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-
-  .comment {
-    font-size: 14px;
-    color: ${colors.neutral[700]};
-    line-height: 1.6;
-    margin-bottom: 12px;
-    font-style: italic;
-  }
-
-  .customer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: ${colors.primary.gradient};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 700;
-      font-size: 16px;
-    }
-
-    .name {
-      font-weight: 600;
-      color: ${colors.neutral[900]};
-    }
-
-    .location {
-      font-size: 12px;
-      color: ${colors.neutral[500]};
-    }
-  }
-`;
-
-// ===== TRUST BADGES =====
-const TrustSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto 40px;
-  padding: 0 20px;
-`;
-
-const TrustGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
-  justify-content: center;
-  padding: 20px;
-  background: ${colors.background.card};
+  margin: 0 0 60px;
+  padding: 30px 20px;
+  background: #f8fafc;
   border-radius: 16px;
-  border: 1px solid ${colors.neutral[200]};
+  border: 1px solid rgba(0,0,0,0.04);
 `;
 
 const TrustBadge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: ${colors.neutral[600]};
-
-  .icon {
-    font-size: 20px;
-  }
-`;
-
-// ===== NEWSLETTER =====
-const NewsletterSection = styled.section`
-  max-width: 800px;
-  margin: 0 auto 60px;
-  padding: 40px;
-  background: ${colors.primary.gradient};
-  border-radius: 20px;
   text-align: center;
-  color: #fff;
-
-  h2 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-
-  p {
-    opacity: 0.9;
-    margin-bottom: 20px;
-  }
-`;
-
-const NewsletterForm = styled.form`
-  display: flex;
-  gap: 12px;
-  max-width: 500px;
-  margin: 0 auto;
-  flex-wrap: wrap;
-
-  input {
-    flex: 1;
-    padding: 14px 20px;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    outline: none;
-    min-width: 200px;
-  }
-
-  button {
-    padding: 14px 32px;
-    background: #fff;
-    color: ${colors.primary.main};
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-  }
-
-  @media (max-width: ${breakpoints.sm}) {
-    flex-direction: column;
-    button { width: 100%; }
-  }
-`;
-
-// ===== VIEW ALL BUTTON =====
-const ViewAllWrapper = styled.div`
-  text-align: center;
-  margin-top: 40px;
-`;
-
-const ViewAllButton = styled(Link)`
-  display: inline-block;
-  padding: 14px 40px;
-  background: ${colors.primary.gradient};
-  color: #fff;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 16px;
-  text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-  }
-`;
+  &:hover { transform: translateY(-4px); }
 
-// ===== POPUP OFFER =====
-const PopupOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;
-  display: ${props => props.show ? 'flex' : 'none'};
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-`;
-
-const PopupContent = styled.div`
-  background: ${colors.background.card};
-  border-radius: 24px;
-  padding: 40px;
-  max-width: 500px;
-  width: 100%;
-  position: relative;
-  text-align: center;
-  animation: popIn 0.5s ease;
-
-  @keyframes popIn {
-    from {
-      transform: scale(0.8);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  .close-btn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: ${colors.neutral[100]};
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: ${colors.status.error};
-      color: #fff;
-    }
-  }
-
-  .icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-  }
-
-  h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: ${colors.neutral[900]};
-    margin-bottom: 8px;
-  }
-
-  p {
-    color: ${colors.neutral[600]};
-    margin-bottom: 20px;
-  }
-
-  .discount-code {
-    display: inline-block;
-    background: ${colors.primary.gradient};
-    color: #fff;
-    padding: 8px 24px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    margin-bottom: 16px;
-  }
-
-  .popup-btn {
-    display: inline-block;
-    padding: 12px 32px;
-    background: ${colors.primary.gradient};
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-    }
-  }
-`;
-
-// ===== FLOATING WHATSAPP BUTTON =====
-const FloatingWhatsApp = styled.a`
-    position: fixed;
-    bottom: 120px;
-    right: 20px;
-    background: #25D366;
-    color: #fff;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    text-decoration: none;
-    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-    z-index: 99;
-    transition: all 0.3s ease;
-
-    &:hover {
-        transform: scale(1.1);
-        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
-    }
-`;
-
-// ===== SECTION HEADER =====
-const SectionHeader = styled.div`
-  text-align: center;
-  margin-bottom: 40px;
-
-  h2 {
+  .number {
     font-size: 2.2rem;
     font-weight: 800;
-    color: ${colors.neutral[900]};
-    margin-bottom: 8px;
-  }
-  p {
-    color: ${colors.neutral[600]};
-    font-size: 1.1rem;
-  }
-  .gradient-text {
-    background: ${colors.primary.gradient};
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  .label {
+    font-size: 14px;
+    color: ${colors.neutral[600]};
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  .icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 6px;
+  }
 `;
 
 // ============================================
-// HELPER FUNCTIONS
+// 2. CATEGORY SECTION - PREMIUM
 // ============================================
 
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
-};
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 60px;
+`;
 
-const getDaysUntil = (dateStr) => {
-    const today = new Date();
-    const date = new Date(dateStr);
-    const diffTime = date - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-};
+const CategoryCard = styled(Link)`
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  text-decoration: none;
+  color: ${colors.neutral[800]};
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    border-color: ${colors.primary.main};
+  }
+
+  .cat-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+  .cat-name { font-weight: 700; font-size: 15px; }
+  .cat-count { font-size: 12px; color: ${colors.neutral[500]}; margin-top: 4px; }
+`;
+
+// ============================================
+// 3. DESTINATION CARDS - PREMIUM
+// ============================================
+
+const DestGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+`;
+
+const DestCard = styled(Link)`
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 24px;
+  text-decoration: none;
+  color: ${colors.neutral[800]};
+  text-align: center;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    &::before { opacity: 1; }
+    .dest-icon { transform: scale(1.1) rotate(-5deg); }
+  }
+
+  .dest-icon { font-size: 48px; display: block; margin-bottom: 12px; transition: transform 0.3s ease; }
+  .dest-name { font-size: 1.2rem; font-weight: 700; color: ${colors.neutral[900]}; margin-bottom: 4px; }
+  .dest-info { font-size: 13px; color: ${colors.neutral[500]}; }
+  .dest-price { display: inline-block; padding: 4px 16px; background: rgba(79,70,229,0.06); color: ${colors.primary.main}; border-radius: 50px; font-size: 13px; font-weight: 600; margin-top: 10px; }
+`;
+
+// ============================================
+// 4. FEATURED TOURS - PREMIUM
+// ============================================
+
+const FeaturedGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+`;
+
+const FeaturedCard = styled(Link)`
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
+  text-decoration: none;
+  color: ${colors.neutral[900]};
+  transition: all 0.4s ease;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    .featured-image img { transform: scale(1.05); }
+    .featured-btn { background: linear-gradient(135deg, #7C3AED, #4F46E5); }
+  }
+
+  .featured-image {
+    height: 220px;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+
+    img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .featured-badge { position: absolute; top: 12px; right: 12px; padding: 4px 14px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); color: #F59E0B; border-radius: 50px; font-size: 11px; font-weight: 700; }
+  }
+
+  .featured-content { padding: 20px;
+    h4 { font-size: 1.1rem; font-weight: 700; margin: 0 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .featured-meta { display: flex; align-items: center; gap: 12px; font-size: 13px; color: ${colors.neutral[500]}; margin-bottom: 10px; }
+    .featured-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid ${colors.neutral[100]};
+      .featured-price { font-size: 1.4rem; font-weight: 800; color: ${colors.primary.main}; }
+      .featured-btn { padding: 8px 24px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; border-radius: 50px; font-size: 13px; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer; }
+    }
+  }
+`;
+
+// ============================================
+// 5. WHY CHOOSE US - PREMIUM
+// ============================================
+
+const WhySection = styled.div`
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 48px 30px;
+  margin-bottom: 60px;
+`;
+
+const WhyGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+`;
+
+const WhyItem = styled.div`
+  text-align: center;
+  padding: 16px;
+  transition: all 0.3s ease;
+
+  &:hover { transform: translateY(-4px); }
+
+  .why-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+  .why-title { font-weight: 700; font-size: 16px; color: ${colors.neutral[900]}; margin-bottom: 4px; }
+  .why-desc { font-size: 13px; color: ${colors.neutral[500]}; line-height: 1.5; }
+`;
+
+// ============================================
+// 6. TESTIMONIALS - PREMIUM
+// ============================================
+
+const TestimonialGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+`;
+
+const TestimonialCard = styled.div`
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+
+  &:hover { transform: translateY(-4px); box-shadow: 0 16px 56px rgba(0,0,0,0.06); }
+
+  .testimonial-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+    .stars { color: #F59E0B; font-size: 18px; letter-spacing: 2px; }
+    .quote-icon { font-size: 32px; color: rgba(79,70,229,0.1); }
+  }
+
+  .comment { color: ${colors.neutral[700]}; font-size: 14px; line-height: 1.8; margin-bottom: 16px; font-style: italic; }
+  .customer { display: flex; align-items: center; gap: 14px;
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+    .customer-info { .name { font-weight: 600; color: ${colors.neutral[900]}; font-size: 15px; } .location { font-size: 13px; color: ${colors.neutral[500]}; } }
+  }
+`;
+
+// ============================================
+// 7. NEWSLETTER - PREMIUM
+// ============================================
+
+const NewsletterSection = styled.div`
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 18px;
+  padding: 48px 40px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(79,70,229,0.1), transparent 70%);
+    border-radius: 50%;
+  }
+
+  h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; position: relative; }
+  p { opacity: 0.8; margin-bottom: 20px; position: relative; font-size: 1rem; }
+`;
+
+const NewsletterForm = styled.form`
+  display: flex;
+  max-width: 500px;
+  margin: 0 auto;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+
+  input {
+    flex: 1; min-width: 200px; padding: 14px 24px; border: none; border-radius: 50px; font-size: 15px; outline: none; background: rgba(255,255,255,0.1); color: #fff; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+    &::placeholder { color: rgba(255,255,255,0.5); }
+    &:focus { border-color: rgba(255,255,255,0.3); }
+  }
+
+  button {
+    padding: 14px 36px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; border: none; border-radius: 50px; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 24px rgba(79,70,229,0.3);
+    &:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(79,70,229,0.4); }
+  }
+`;
+
+// ============================================
+// FLOATING WHATSAPP
+// ============================================
+
+const FloatingWhatsApp = styled.a`
+  position: fixed;
+  bottom: 100px; right: 24px;
+  background: #25D366;
+  color: #fff;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  text-decoration: none;
+  box-shadow: 0 4px 25px rgba(37,211,102,0.4);
+  z-index: 999;
+  transition: all 0.3s ease;
+
+  &:hover { transform: scale(1.1); box-shadow: 0 8px 40px rgba(37,211,102,0.5); }
+
+  @media (max-width: ${breakpoints.md}) {
+    width: 52px; height: 52px; font-size: 26px; bottom: 80px; right: 16px;
+  }
+`;
+
+// ============================================
+// LOADING SKELETON
+// ============================================
+
+const LoadingWrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+`;
+
+const LoadingCard = styled.div`
+  background: #fff; border-radius: 18px; padding: 24px;
+  animation: shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+`;
 
 // ============================================
 // COMPONENT
@@ -983,376 +766,350 @@ const getDaysUntil = (dateStr) => {
 
 function Home() {
   const [featuredYatras, setFeaturedYatras] = useState([]);
-  const [upcomingYatras, setUpcomingYatras] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const [settings, setSettings] = useState({
+    hero_title: '',
+    hero_subtitle: '',
+    hero_badge: '',
+    show_buttons: true,
+    stats_travelers: '5000+',
+    stats_destinations: '50+',
+    stats_rating: '4.9',
+    stats_label_travelers: 'Happy Travelers',
+    stats_label_destinations: 'Destinations',
+    stats_label_rating: 'Average Rating',
+    slider_images: [],
+    logo_url: '',
+    whatsapp_number: '919312113322',
+  });
+
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showPopup, setShowPopup] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
-
-  // Hero slides data
-  const slides = [
-    {
-      id: 1,
-      title: 'Spiritual Yatras Across India',
-      subtitle: 'Visit sacred temples, holy rivers, and divine destinations with our carefully curated pilgrimage tours.',
-      bg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(245, 158, 11, 0.9) 100%)',
-      emoji: '🙏'
-    },
-    {
-      id: 2,
-      title: 'Adventure & Hill Station Tours',
-      subtitle: 'From Manali to Kasol, experience the thrill of mountains, snow, and scenic landscapes.',
-      bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)',
-      emoji: '🏔️'
-    },
-    {
-      id: 3,
-      title: 'Explore the Divine & Scenic India',
-      subtitle: 'Experience spiritual journeys, hill station retreats, and adventure tours with premium car rentals and expert guides.',
-      bg: 'linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(124, 58, 237, 0.9) 100%)',
-      emoji: '🛕'
-    },
-    {
-      id: 4,
-      title: 'Customized Tours Just for You',
-      subtitle: 'Tailor-made itineraries to match your preferences, budget, and travel style.',
-      bg: 'linear-gradient(135deg, rgba(236, 72, 153, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%)',
-      emoji: '✨'
-    }
-  ];
-
-  // Featured Destinations Data
-  const destinations = [
-    {
-      id: 'manali',
-      name: 'Manali',
-      icon: '🏔️',
-      bg: 'linear-gradient(135deg, #74B9FF, #0984E3)',
-      tours: '7 Tours',
-      price: '₹4,500'
-    },
-    {
-      id: 'vrindavan',
-      name: 'Vrindavan',
-      icon: '🛕',
-      bg: 'linear-gradient(135deg, #FF6B6B, #EE5A24)',
-      tours: '4 Tours',
-      price: '₹1,000'
-    },
-    {
-      id: 'khatu-shyam',
-      name: 'Khatu Shyam',
-      icon: '🙏',
-      bg: 'linear-gradient(135deg, #FDCB6E, #E17055)',
-      tours: '6 Tours',
-      price: '₹1,400'
-    },
-    {
-      id: 'barsana',
-      name: 'Barsana',
-      icon: '🌸',
-      bg: 'linear-gradient(135deg, #F093FB, #F5576C)',
-      tours: '4 Tours',
-      price: '₹1,700'
-    }
-  ];
+  const sliderInterval = useRef(null);
 
   useEffect(() => {
-    loadData();
-    
-    const timer = setTimeout(() => {
-      setShowPopup(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    const loadSettings = async () => {
+      try {
+        const data = await getHomeSettings();
+        setSettings(prev => ({ ...prev, ...data, slider_images: data.slider_images || [] }));
+      } catch (error) { console.error('Error loading home settings:', error); }
+    };
+    loadSettings();
+    loadFeaturedTours();
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
+    const handleScrollProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+    };
+    window.addEventListener('scroll', handleScrollProgress);
+    return () => window.removeEventListener('scroll', handleScrollProgress);
+  }, []);
 
-  const loadData = async () => {
+  useEffect(() => {
+    if (settings.slider_images && settings.slider_images.length > 1) {
+      sliderInterval.current = setInterval(() => {
+        setCurrentSlide(prev => prev === settings.slider_images.length - 1 ? 0 : prev + 1);
+      }, 5000);
+    }
+    return () => { if (sliderInterval.current) clearInterval(sliderInterval.current); };
+  }, [settings.slider_images]);
+
+  const loadFeaturedTours = async () => {
     try {
       setLoading(true);
       const data = await getYatras();
-      
-      const sorted = [...data].sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
-      setFeaturedYatras(sorted.slice(0, 4));
-      
-      const today = new Date();
-      const upcoming = sorted.filter(y => new Date(y.start_date) > today);
-      setUpcomingYatras(upcoming.slice(0, 4));
-      
-    } catch (err) {
-      console.error('Error loading tours:', err);
-    } finally {
-      setLoading(false);
-    }
+      setFeaturedYatras(data.slice(0, 4));
+    } catch (err) { console.error('Error loading featured tours:', err); } finally { setLoading(false); }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/tours?search=${encodeURIComponent(searchTerm)}`);
-    }
-  };
-
-  const testimonials = [
-    {
-      id: 1,
-      name: 'Mohit Gupta',
-      location: 'Delhi',
-      comment: 'I had to catch a flight from Delhi and was worried about finding reliable transportation. GetMeYatra showed up on time, and the ride was smooth. I\'ll definitely use them for future trips!',
-      rating: 5
-    },
-    {
-      id: 2,
-      name: 'Ashish Kumar',
-      location: 'Mumbai',
-      comment: 'Amazing service! The cab was clean, the driver was professional, and I felt very safe throughout the journey. This is definitely my new go-to for all my travel needs!',
-      rating: 5
-    },
-    {
-      id: 3,
-      name: 'Aayushi Roy',
-      location: 'Bangalore',
-      comment: 'I\'ve tried multiple services, but GetMeYatra\'s customer service really stood out. They were quick to assist with a minor issue I had, and it made all the difference in my experience.',
-      rating: 5
-    }
-  ];
-
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const renderStars = (rating) => {
-    return '⭐'.repeat(rating);
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '⭐'.repeat(full) + (half ? '⭐' : '') + '☆'.repeat(empty);
   };
+
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const goToSlide = (index) => setCurrentSlide(index);
+  const goToPrev = () => setCurrentSlide(prev => prev === 0 ? settings.slider_images.length - 1 : prev - 1);
+  const goToNext = () => setCurrentSlide(prev => prev === settings.slider_images.length - 1 ? 0 : prev + 1);
+
+  const WHATSAPP_NUMBER = settings.whatsapp_number || '919312113322';
+  const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20I%20want%20to%20know%20more%20about%20your%20tours`;
+
+  const destinations = [
+    { name: 'Manali', icon: '🏔️', tours: 7, price: '₹4,500', link: '/tours' },
+    { name: 'Haridwar', icon: '🌊', tours: 4, price: '₹1,000', link: '/tours' },
+    { name: 'Khatu Shyam', icon: '🙏', tours: 6, price: '₹1,400', link: '/tours' },
+    { name: 'Vrindavan', icon: '🌸', tours: 4, price: '₹1,700', link: '/tours' },
+  ];
+
+  const categories = [
+    { name: 'Spiritual Tours', icon: '🛕', count: 12, link: '/tours' },
+    { name: 'Adventure Tours', icon: '🏔️', count: 8, link: '/tours' },
+    { name: 'Heritage Tours', icon: '🏛️', count: 6, link: '/tours' },
+    { name: 'Weekend Getaways', icon: '🌅', count: 10, link: '/tours' },
+  ];
+
+  const testimonials = [
+    { id: 1, name: 'Rahul Sharma', location: 'Delhi', rating: 5, comment: 'GetMeYatra made our trip unforgettable. The arrangements were perfect and we felt completely safe throughout the journey. Highly recommended!' },
+    { id: 2, name: 'Priya Patel', location: 'Mumbai', rating: 5, comment: 'Best travel experience ever! The team was professional and everything was well-organized. Will definitely book again!' },
+    { id: 3, name: 'Amit Singh', location: 'Bangalore', rating: 5, comment: 'Amazing service! From booking to the end of the trip, everything was smooth. The guides were knowledgeable and friendly.' },
+  ];
 
   return (
     <PageContainer>
-      {/* ===== HERO SLIDER ===== */}
-      <HeroSlider>
-        <SlideContainer currentIndex={currentSlide}>
-          {slides.map((slide) => (
-            <Slide key={slide.id} bg={slide.bg}>
-              <div className="slide-content">
-                <div style={{ fontSize: '64px', marginBottom: '16px' }}>{slide.emoji}</div>
-                <h1 dangerouslySetInnerHTML={{ __html: slide.title.replace(/(Divine & Scenic|Spiritual Yatras|Adventure & Hill Station|Customized Tours)/g, '<span class="highlight">$1</span>') }} />
-                <p>{slide.subtitle}</p>
-                <HeroButtons>
-                  <HeroButton to="/tours" className="primary">Explore Tours</HeroButton>
-                  <HeroButton to="/contact" className="secondary">Contact Us</HeroButton>
-                </HeroButtons>
-              </div>
-            </Slide>
-          ))}
-        </SlideContainer>
-        
-        <SlideDots>
-          {slides.map((_, index) => (
-            <Dot key={index} active={index === currentSlide} onClick={() => setCurrentSlide(index)} />
-          ))}
-        </SlideDots>
-        
-        <SlideArrow className="prev" onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}>‹</SlideArrow>
-        <SlideArrow className="next" onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}>›</SlideArrow>
-      </HeroSlider>
+      <ScrollProgress progress={scrollProgress} />
 
-      {/* ===== SEARCH BAR ===== */}
-      <SearchSection>
-        <SearchBox>
-          <input 
-            type="text" 
-            placeholder="Search for tours, destinations..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button onClick={handleSearch}>Search Tours</button>
-        </SearchBox>
-      </SearchSection>
+      {/* ===== HERO SECTION (UNCHANGED) ===== */}
+      <HeroSection>
+        {settings.slider_images && settings.slider_images.length > 0 ? (
+          <SliderContainer>
+            <SliderWrapper style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+              {settings.slider_images.map((img, index) => (
+                <Slide key={index}>
+                  <img src={`https://getmeyatra.com${img}`} alt={`Slide ${index + 1}`} loading="lazy" />
+                </Slide>
+              ))}
+            </SliderWrapper>
 
-      {/* ===== STATS ===== */}
-      <StatsSection>
-        <StatCard>
-          <span className="number">1000+</span>
-          <span className="label">Happy Travelers</span>
-        </StatCard>
-        <StatCard>
-          <span className="number">50+</span>
-          <span className="label">Destinations</span>
-        </StatCard>
-        <StatCard>
-          <span className="number">100%</span>
-          <span className="label">Customized Tours</span>
-        </StatCard>
-        <StatCard>
-          <span className="number">98%</span>
-          <span className="label">Satisfaction Rate</span>
-        </StatCard>
-      </StatsSection>
+            {settings.slider_images.length > 1 && (
+              <>
+                <SliderArrow className="prev" onClick={goToPrev}>‹</SliderArrow>
+                <SliderArrow className="next" onClick={goToNext}>›</SliderArrow>
+                <SliderDots>
+                  {settings.slider_images.map((_, index) => (
+                    <Dot key={index} active={currentSlide === index} onClick={() => goToSlide(index)} />
+                  ))}
+                </SliderDots>
+              </>
+            )}
+          </SliderContainer>
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' }} />
+        )}
 
-      {/* ============================================
-          NEW: FEATURED DESTINATIONS
-      ============================================ */}
-      <DestSection>
+        <HeroContent>
+          <HeroBadge>
+            <span className="dot"></span>
+            {settings.hero_badge || 'Explore India with GetMeYatra'}
+          </HeroBadge>
+
+          <HeroTitle dangerouslySetInnerHTML={{
+            __html: settings.hero_title || 'Discover the <span class="highlight">Spiritual & Scenic</span> Beauty of India'
+          }} />
+
+          <HeroSubtitle>
+            {settings.hero_subtitle || 'Journey to sacred temples, serene hill stations, and breathtaking landscapes with comfortable travel, expert guides, and unforgettable experiences.'}
+          </HeroSubtitle>
+
+          <SearchBar>
+            <input type="text" placeholder="🔍 Search tours..." />
+            <select>
+              <option value="">📍 All Destinations</option>
+              <option value="manali">Manali</option>
+              <option value="vrindavan">Vrindavan</option>
+              <option value="khatu">Khatu Shyam</option>
+              <option value="haridwar">Haridwar</option>
+            </select>
+            <input type="date" />
+            <Link to="/tours" className="search-btn">Find Tours →</Link>
+          </SearchBar>
+
+          <HeroButtons>
+            <HeroButton to="/tours" className="primary">Explore Tours →</HeroButton>
+            <HeroButton to="/contact" className="secondary">Contact Us</HeroButton>
+          </HeroButtons>
+
+          <HeroStats>
+            <div className="stat">
+              <span className="icon">🚌</span>
+              <div className="number">{settings.stats_travelers || '5000+'}</div>
+              <span className="label">{settings.stats_label_travelers || 'Happy Travelers'}</span>
+            </div>
+            <div className="stat">
+              <span className="icon">📍</span>
+              <div className="number">{settings.stats_destinations || '50+'}</div>
+              <span className="label">{settings.stats_label_destinations || 'Destinations'}</span>
+            </div>
+            <div className="stat">
+              <span className="icon">⭐</span>
+              <div className="number">{settings.stats_rating || '4.9'}</div>
+              <span className="label">{settings.stats_label_rating || 'Average Rating'}</span>
+            </div>
+          </HeroStats>
+        </HeroContent>
+      </HeroSection>
+
+      {/* ============================================ */}
+      {/* BELOW HERO - PREMIUM & ATTRACTIVE            */}
+      {/* ============================================ */}
+
+      <Container>
+
+        {/* ===== 1. TRUST BADGES ===== */}
+        <TrustBadges>
+          <TrustBadge>
+            <span className="icon">🏆</span>
+            <div className="number">75+</div>
+            <div className="label">Years of Trust</div>
+          </TrustBadge>
+          <TrustBadge>
+            <span className="icon">👥</span>
+            <div className="number">5000+</div>
+            <div className="label">Happy Travelers</div>
+          </TrustBadge>
+          <TrustBadge>
+            <span className="icon">📍</span>
+            <div className="number">50+</div>
+            <div className="label">Destinations</div>
+          </TrustBadge>
+          <TrustBadge>
+            <span className="icon">⭐</span>
+            <div className="number">4.9</div>
+            <div className="label">Average Rating</div>
+          </TrustBadge>
+          <TrustBadge>
+            <span className="icon">🛡️</span>
+            <div className="number">100%</div>
+            <div className="label">Safe Travel</div>
+          </TrustBadge>
+        </TrustBadges>
+
+        {/* ===== 2. CATEGORIES ===== */}
         <SectionHeader>
-          <h2>🏝️ Popular <span className="gradient-text">Destinations</span></h2>
+          <span className="badge">Categories</span>
+          <h2>Explore by <span className="gradient-text">Interest</span></h2>
+          <p>Find the perfect tour based on what you love</p>
+        </SectionHeader>
+
+        <CategoryGrid>
+          {categories.map((cat, index) => (
+            <CategoryCard key={index} to={cat.link}>
+              <span className="cat-icon">{cat.icon}</span>
+              <div className="cat-name">{cat.name}</div>
+              <div className="cat-count">{cat.count} Tours</div>
+            </CategoryCard>
+          ))}
+        </CategoryGrid>
+
+        {/* ===== 3. POPULAR DESTINATIONS ===== */}
+        <SectionHeader>
+          <span className="badge">Destinations</span>
+          <h2>Popular <span className="gradient-text">Destinations</span></h2>
           <p>Explore our most popular tour destinations</p>
         </SectionHeader>
+
         <DestGrid>
-          {destinations.map((dest) => (
-            <DestCard key={dest.id} bg={dest.bg}>
-              <div className="dest-image">
-                <span style={{ fontSize: '64px' }}>{dest.icon}</span>
-                <div className="dest-overlay">
-                  <h3 className="dest-name">{dest.name}</h3>
-                </div>
-              </div>
-              <div className="dest-content">
-                <div className="dest-tours">{dest.tours} available</div>
-                <div className="dest-price">Starting from {dest.price}</div>
-                <br />
-                <Link to="/tours" className="dest-btn">View Tours →</Link>
-              </div>
+          {destinations.map((dest, index) => (
+            <DestCard key={index} to={dest.link}>
+              <span className="dest-icon">{dest.icon}</span>
+              <div className="dest-name">{dest.name}</div>
+              <div className="dest-info">{dest.tours} Tours available</div>
+              <span className="dest-price">From {dest.price}</span>
             </DestCard>
           ))}
         </DestGrid>
-      </DestSection>
 
-      {/* ===== WHY CHOOSE US ===== */}
-      <WhySection>
+        {/* ===== 4. FEATURED TOURS ===== */}
         <SectionHeader>
-          <h2>Why Choose <span className="gradient-text">GetMeYatra</span></h2>
-          <p>Your trusted partner for spiritual and adventure travel</p>
-        </SectionHeader>
-        <WhyGrid>
-          <WhyCard>
-            <span className="icon">🚌</span>
-            <h4>Premium Transport</h4>
-            <p>Comfortable AC vehicles with experienced drivers for a safe journey</p>
-          </WhyCard>
-          <WhyCard>
-            <span className="icon">🏨</span>
-            <h4>Quality Stays</h4>
-            <p>Carefully selected hotels and accommodations for a comfortable stay</p>
-          </WhyCard>
-          <WhyCard>
-            <span className="icon">👨‍💼</span>
-            <h4>Expert Guides</h4>
-            <p>Knowledgeable tour coordinators to enhance your travel experience</p>
-          </WhyCard>
-          <WhyCard>
-            <span className="icon">💯</span>
-            <h4>Best Price Guarantee</h4>
-            <p>Competitive prices with no hidden charges. Book with confidence</p>
-          </WhyCard>
-        </WhyGrid>
-      </WhySection>
-
-      {/* ===== UPCOMING TOURS ===== */}
-      <UpcomingSection>
-        <SectionHeader>
-          <h2>🚀 Upcoming <span className="gradient-text">Tours</span></h2>
-          <p>Book your spot before they fill up</p>
-        </SectionHeader>
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-            <p className="text-gray-500 mt-4">Loading upcoming tours...</p>
-          </div>
-        ) : (
-          <>
-            <UpcomingGrid>
-              {upcomingYatras.map((yatra) => {
-                const daysUntil = getDaysUntil(yatra.start_date);
-                return (
-                  <UpcomingCard key={yatra.id} to={`/yatra/${yatra.id}`}>
-                    <div className="upcoming-image">
-                      {yatra.image_url ? (
-                        <img src={'http://getmeyatra.com' + yatra.image_url} alt={yatra.yatra_name} />
-                      ) : (
-                        '🗓️'
-                      )}
-                    </div>
-                    <div className="upcoming-content">
-                      <span className="upcoming-date">📅 {formatDate(yatra.start_date)}</span>
-                      <h4>{yatra.yatra_name}</h4>
-                      <p>{formatDate(yatra.start_date)} - {formatDate(yatra.end_date)}</p>
-                      <div className="upcoming-price">₹{yatra.rate_per_seat} / seat</div>
-                    </div>
-                    {daysUntil > 0 && daysUntil <= 7 && (
-                      <div className="countdown-badge">🔥 {daysUntil} days left</div>
-                    )}
-                  </UpcomingCard>
-                );
-              })}
-            </UpcomingGrid>
-            {upcomingYatras.length > 0 && (
-              <ViewAllWrapper>
-                <ViewAllButton to="/tours">View All Tours →</ViewAllButton>
-              </ViewAllWrapper>
-            )}
-          </>
-        )}
-      </UpcomingSection>
-
-      {/* ===== FEATURED TOURS ===== */}
-      <FeaturedSection>
-        <SectionHeader>
-          <h2>✨ Featured <span className="gradient-text">Tours</span></h2>
+          <span className="badge">Featured</span>
+          <h2>Popular <span className="gradient-text">Tours</span></h2>
           <p>Handpicked spiritual and adventure journeys you'll love</p>
         </SectionHeader>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-            <p className="text-gray-500 mt-4">Loading featured tours...</p>
-          </div>
+          <LoadingWrapper>
+            {[1, 2, 3, 4].map(i => <LoadingCard key={i} />)}
+          </LoadingWrapper>
         ) : (
-          <>
-            <FeaturedGrid>
-              {featuredYatras.map((yatra) => (
-                <FeaturedCard key={yatra.id} to={`/yatra/${yatra.id}`}>
-                  <div className="featured-image">
-                    {yatra.image_url ? (
-                      <img src={'http://getmeyatra.com' + yatra.image_url} alt={yatra.yatra_name} />
-                    ) : (
-                      '🏔️'
-                    )}
+          <FeaturedGrid>
+            {featuredYatras.map((yatra) => (
+              <FeaturedCard key={yatra.id} to={`/yatra/${yatra.id}`}>
+                <div className="featured-image">
+                  {yatra.image_url ? (
+                    <img src={`https://getmeyatra.com${yatra.image_url}`} alt={yatra.yatra_name} />
+                  ) : '🏔️'}
+                  <span className="featured-badge">⭐ Featured</span>
+                </div>
+                <div className="featured-content">
+                  <h4>{yatra.yatra_name}</h4>
+                  <div className="featured-meta">
+                    <span>📅 {formatDate(yatra.start_date)} - {formatDate(yatra.end_date)}</span>
                   </div>
-                  <div className="featured-content">
-                    <span className="featured-badge">⭐ Featured</span>
-                    <h4>{yatra.yatra_name}</h4>
-                    <p>{formatDate(yatra.start_date)} - {formatDate(yatra.end_date)}</p>
-                    <div className="featured-price">₹{yatra.rate_per_seat} / seat</div>
+                  <div className="featured-bottom">
+                    <span className="featured-price">₹{yatra.rate_per_seat}</span>
+                    <span className="featured-btn">View Details</span>
                   </div>
-                </FeaturedCard>
-              ))}
-            </FeaturedGrid>
-          </>
+                </div>
+              </FeaturedCard>
+            ))}
+          </FeaturedGrid>
         )}
-      </FeaturedSection>
 
-      {/* ===== TESTIMONIALS ===== */}
-      <TestimonialSection>
+        {/* ===== 5. WHY CHOOSE US ===== */}
+        <WhySection>
+          <SectionHeader style={{ marginBottom: '16px' }}>
+            <span className="badge">Why Us</span>
+            <h2>Why Choose <span className="gradient-text">GetMeYatra</span></h2>
+          </SectionHeader>
+          <WhyGrid>
+            <WhyItem>
+              <span className="why-icon">🚌</span>
+              <div className="why-title">Comfortable Travel</div>
+              <div className="why-desc">Well-maintained vehicles with experienced drivers</div>
+            </WhyItem>
+            <WhyItem>
+              <span className="why-icon">🏨</span>
+              <div className="why-title">Quality Stays</div>
+              <div className="why-desc">Carefully selected hotels for a comfortable stay</div>
+            </WhyItem>
+            <WhyItem>
+              <span className="why-icon">👨‍💼</span>
+              <div className="why-title">Expert Guides</div>
+              <div className="why-desc">Knowledgeable tour coordinators to enhance your experience</div>
+            </WhyItem>
+            <WhyItem>
+              <span className="why-icon">💯</span>
+              <div className="why-title">Best Price Guarantee</div>
+              <div className="why-desc">Competitive prices with no hidden charges</div>
+            </WhyItem>
+          </WhyGrid>
+        </WhySection>
+
+        {/* ===== 6. TESTIMONIALS ===== */}
         <SectionHeader>
-          <h2>⭐ What Our <span className="gradient-text">Travelers Say</span></h2>
+          <span className="badge">Testimonials</span>
+          <h2>What Our <span className="gradient-text">Travelers Say</span></h2>
           <p>Real experiences from real people</p>
         </SectionHeader>
+
         <TestimonialGrid>
           {testimonials.map((testimonial) => (
             <TestimonialCard key={testimonial.id}>
-              <div className="stars">{renderStars(testimonial.rating)}</div>
+              <div className="testimonial-header">
+                <div className="stars">{renderStars(testimonial.rating)}</div>
+                <span className="quote-icon">"</span>
+              </div>
               <div className="comment">"{testimonial.comment}"</div>
               <div className="customer">
                 <div className="avatar">{getInitials(testimonial.name)}</div>
-                <div>
+                <div className="customer-info">
                   <div className="name">{testimonial.name}</div>
                   <div className="location">{testimonial.location}</div>
                 </div>
@@ -1360,52 +1117,23 @@ function Home() {
             </TestimonialCard>
           ))}
         </TestimonialGrid>
-      </TestimonialSection>
 
-      {/* ===== TRUST BADGES ===== */}
-      <TrustSection>
-        <TrustGrid>
-          <TrustBadge><span className="icon">🔒</span> Secure Payments</TrustBadge>
-          <TrustBadge><span className="icon">✅</span> Verified Tours</TrustBadge>
-          <TrustBadge><span className="icon">🛡️</span> Safety Assured</TrustBadge>
-          <TrustBadge><span className="icon">💳</span> No Hidden Charges</TrustBadge>
-          <TrustBadge><span className="icon">📱</span> 24/7 Support</TrustBadge>
-        </TrustGrid>
-      </TrustSection>
+        {/* ===== 7. NEWSLETTER ===== */}
+        <NewsletterSection>
+          <h2>📧 Stay Updated</h2>
+          <p>Get the latest tour updates, exclusive offers, and travel tips</p>
+          <NewsletterForm onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing! 🎉'); }}>
+            <input type="email" placeholder="Enter your email address" required />
+            <button type="submit">Subscribe</button>
+          </NewsletterForm>
+        </NewsletterSection>
 
-      {/* ===== NEWSLETTER ===== */}
-      <NewsletterSection>
-        <h2>📧 Subscribe to Our Newsletter</h2>
-        <p>Get the latest tour updates, exclusive offers, and travel tips</p>
-        <NewsletterForm onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing!'); }}>
-          <input type="email" placeholder="Enter your email address" required />
-          <button type="submit">Subscribe</button>
-        </NewsletterForm>
-      </NewsletterSection>
+      </Container>
 
-      {/* ===== FLOATING WHATSAPP BUTTON ===== */}
-      <FloatingWhatsApp 
-          href="https://wa.me/918010320000?text=Hi%20I%20want%20to%20know%20more%20about%20your%20tours"
-          target="_blank"
-          rel="noopener noreferrer"
-      >
-          💬
+      {/* ===== FLOATING WHATSAPP ===== */}
+      <FloatingWhatsApp href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
+        💬
       </FloatingWhatsApp>
-
-      {/* ===== POPUP OFFER ===== */}
-      <PopupOverlay show={showPopup}>
-        <PopupContent>
-          <button className="close-btn" onClick={() => setShowPopup(false)}>✕</button>
-          <div className="icon">🎉</div>
-          <h2>Welcome to GetMeYatra!</h2>
-          <p>Get <strong>10% OFF</strong> on your first booking. Use the code below:</p>
-          <div className="discount-code">GETME10</div>
-          <br />
-          <Link to="/tours" className="popup-btn" onClick={() => setShowPopup(false)}>
-            Explore Tours →
-          </Link>
-        </PopupContent>
-      </PopupOverlay>
     </PageContainer>
   );
 }

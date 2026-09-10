@@ -7,6 +7,8 @@ const FooterContainer = styled.footer`
   background: #1a1a2e;
   color: #fff;
   padding: 60px 0 0;
+  width: 100%;
+  margin-top: auto;
 `;
 
 const FooterWrapper = styled.div`
@@ -176,7 +178,6 @@ const Footer = () => {
     <FooterContainer>
       <FooterWrapper>
         <FooterTop>
-          {/* Company Info */}
           <FooterSection>
             <h3>
               <span className="logo-icon">🚐</span>
@@ -185,7 +186,7 @@ const Footer = () => {
             <p>
               Your trusted partner for car rentals and group tours across India. 
               Experience spiritual journeys, hill station retreats, and adventure 
-              tours with premium vehicles and expert guides.
+              tours with comfortable vehicles and expert guides.
             </p>
             <SocialLinks>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
@@ -197,13 +198,12 @@ const Footer = () => {
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                 <i className="fab fa-youtube"></i>
               </a>
-              <a href="https://wa.me/918010320000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <a href="https://wa.me/919312113322" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                 <i className="fab fa-whatsapp"></i>
               </a>
             </SocialLinks>
           </FooterSection>
 
-          {/* Quick Links */}
           <FooterSection>
             <h4>Quick Links</h4>
             <ul>
@@ -215,7 +215,6 @@ const Footer = () => {
             </ul>
           </FooterSection>
 
-          {/* Contact Info */}
           <FooterSection>
             <h4>Contact Us</h4>
             <ul>
@@ -223,21 +222,14 @@ const Footer = () => {
                 <i className="fas fa-phone"></i>
                 <div>
                   <span className="label">Telephone:</span>
-                  <a href="tel:+918010320000">+91 8010320000</a>
+                  <a href="tel:+919312113322">+91 9312113322</a>
                 </div>
               </li>
               <li>
                 <i className="fab fa-whatsapp"></i>
                 <div>
                   <span className="label">WhatsApp:</span>
-                  <a href="https://wa.me/918010320000">+91 8010320000</a>
-                </div>
-              </li>
-              <li>
-                <i className="fas fa-phone-alt"></i>
-                <div>
-                  <span className="label">Others:</span>
-                  <a href="tel:+919015154545">+91 9015154545</a>, <a href="tel:+919312113322">+91 9312113322</a>
+                  <a href="https://wa.me/919312113322">+91 9312113322</a>
                 </div>
               </li>
               <li>
@@ -250,7 +242,6 @@ const Footer = () => {
             </ul>
           </FooterSection>
 
-          {/* Office Addresses */}
           <FooterSection>
             <h4>Our Offices</h4>
             <ul>
@@ -273,7 +264,6 @@ const Footer = () => {
         </FooterTop>
       </FooterWrapper>
 
-      {/* Bottom Footer with Business Info */}
       <FooterBottom>
         <BottomWrapper>
           <div>
