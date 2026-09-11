@@ -174,6 +174,96 @@ const BookButton = styled(Link)`
   }
 `;
 
+const ServicesDropdown = styled.li`
+  position: relative;
+
+  .services-trigger {
+    color: ${colors.neutral[700]};
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+  }
+
+  .services-trigger:hover {
+    color: ${colors.primary.main};
+  }
+
+  .services-menu {
+    position: absolute;
+    top: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 190px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: ${shadows.xl};
+    border: 1px solid ${colors.neutral[100]};
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1100;
+  }
+
+  &:hover .services-menu {
+    opacity: 1;
+    visibility: visible;
+    top: calc(100% + 8px);
+  }
+
+  .service-link {
+    display: block;
+    padding: 11px 13px;
+    color: ${colors.neutral[700]};
+    text-decoration: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .service-link:hover {
+    background: rgba(79,70,229,0.06);
+    color: ${colors.primary.main};
+    transform: translateX(3px);
+  }
+
+  @media (max-width: ${breakpoints.md}) {
+    width: 100%;
+    text-align: center;
+
+    .services-trigger {
+      justify-content: center;
+      font-size: 18px;
+      padding: 10px 0;
+      width: 100%;
+    }
+
+    .services-menu {
+      position: static;
+      transform: none;
+      box-shadow: none;
+      border: none;
+      min-width: 0;
+      width: 100%;
+      padding: 0 0 8px;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .service-link {
+      font-size: 16px;
+      text-align: center;
+      padding: 9px;
+    }
+  }
+`;
+
 const AuthButton = styled(Link)`
   color: ${({ active }) => active ? colors.primary.main : colors.neutral[700]};
   text-decoration: none;
@@ -287,6 +377,7 @@ const Overlay = styled.div`
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isCabMenuOpen, setIsCabMenuOpen] = useState(false);
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
@@ -329,7 +420,10 @@ function Navbar() {
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setIsCabMenuOpen(false);
+  };
 
   return (
     <NavContainer>
@@ -359,6 +453,34 @@ function Navbar() {
           <NavMenu isOpen={isOpen}>
             <li><NavLink to="/" active={location.pathname === '/'} onClick={closeMenu}>Home</NavLink></li>
             <li><NavLink to="/tours" active={location.pathname === '/tours'} onClick={closeMenu}>Tours</NavLink></li>
+
+            <ServicesDropdown>
+              <button
+                type="button"
+                className="services-trigger"
+                onClick={() => setIsCabMenuOpen(!isCabMenuOpen)}
+              >
+                Cab Services <span>▾</span>
+              </button>
+
+              <div className="services-menu" style={{ opacity: isCabMenuOpen ? 1 : undefined, visibility: isCabMenuOpen ? 'visible' : undefined }}>
+                <Link
+                  to="/one-way"
+                  className="service-link"
+                  onClick={closeMenu}
+                >
+                  🚕 One Way
+                </Link>
+                <Link
+                  to="/round-trip"
+                  className="service-link"
+                  onClick={closeMenu}
+                >
+                  🔄 Round Trip
+                </Link>
+              </div>
+            </ServicesDropdown>
+
             <li><NavLink to="/about" active={location.pathname === '/about'} onClick={closeMenu}>About</NavLink></li>
             <li><NavLink to="/contact" active={location.pathname === '/contact'} onClick={closeMenu}>Contact</NavLink></li>
             

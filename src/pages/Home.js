@@ -471,6 +471,112 @@ const TrustBadge = styled.div`
 // 2. CATEGORY SECTION - PREMIUM
 // ============================================
 
+const CabServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 60px;
+
+  @media (max-width: ${breakpoints.md}) {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+`;
+
+const CabServiceCard = styled(Link)`
+  position: relative;
+  overflow: hidden;
+  min-height: 230px;
+  padding: 32px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  box-shadow: 0 10px 35px rgba(79,70,229,0.18);
+  transition: all 0.35s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    right: -55px;
+    top: -65px;
+    background: rgba(255,255,255,0.10);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    right: 45px;
+    bottom: -70px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  &:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 18px 50px rgba(79,70,229,0.28);
+  }
+
+  .service-content {
+    position: relative;
+    z-index: 1;
+    max-width: 75%;
+  }
+
+  .service-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 16px;
+    font-size: 29px;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.55rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0 0 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.84);
+  }
+
+  .service-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  @media (max-width: ${breakpoints.sm}) {
+    min-height: 210px;
+    padding: 26px;
+
+    .service-content {
+      max-width: 88%;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+    }
+  }
+`;
+
 const CategoryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -991,7 +1097,40 @@ function Home() {
           </TrustBadge>
         </TrustBadges>
 
-        {/* ===== 2. CATEGORIES ===== */}
+        {/* ===== 2. CAB SERVICES ===== */}
+        <SectionHeader>
+          <span className="badge">Cab Services</span>
+          <h2>Travel Your Way with <span className="gradient-text">GetMeYatra</span></h2>
+          <p>Comfortable, reliable cab services for one-way and return journeys</p>
+        </SectionHeader>
+
+        <CabServicesGrid>
+          <CabServiceCard to="/one-way">
+            <div className="service-content">
+              <div className="service-icon">🚕</div>
+              <h3>One Way Cab</h3>
+              <p>
+                Travel comfortably from your pickup location to your destination
+                with a reliable private cab.
+              </p>
+              <span className="service-cta">Plan One Way Trip →</span>
+            </div>
+          </CabServiceCard>
+
+          <CabServiceCard to="/round-trip">
+            <div className="service-content">
+              <div className="service-icon">🔄</div>
+              <h3>Round Trip Cab</h3>
+              <p>
+                Book a comfortable cab for your complete journey with convenient
+                pickup and return travel.
+              </p>
+              <span className="service-cta">Plan Round Trip →</span>
+            </div>
+          </CabServiceCard>
+        </CabServicesGrid>
+
+        {/* ===== 3. CATEGORIES ===== */}
         <SectionHeader>
           <span className="badge">Categories</span>
           <h2>Explore by <span className="gradient-text">Interest</span></h2>
