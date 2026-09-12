@@ -185,7 +185,10 @@ const ServicesDropdown = styled.li`
     padding: 5px 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 7px;
+    background: transparent;
+    border: none;
+    font-family: inherit;
     transition: color 0.3s ease;
   }
 
@@ -193,49 +196,99 @@ const ServicesDropdown = styled.li`
     color: ${colors.primary.main};
   }
 
+  .services-trigger span {
+    font-size: 10px;
+    transition: transform 0.25s ease;
+  }
+
+  &.open .services-trigger span {
+    transform: rotate(180deg);
+  }
+
   .services-menu {
     position: absolute;
-    top: calc(100% + 15px);
+    top: calc(100% + 14px);
     left: 50%;
-    transform: translateX(-50%);
-    min-width: 190px;
+    transform: translateX(-50%) translateY(-6px);
+    width: 230px;
     background: #fff;
+    border: 1px solid ${colors.neutral[200]};
     border-radius: 14px;
     padding: 8px;
-    box-shadow: ${shadows.xl};
-    border: 1px solid ${colors.neutral[100]};
+    box-shadow: 0 18px 45px rgba(31,41,55,0.16);
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transition: all 0.2s ease;
     z-index: 1100;
   }
 
-  &:hover .services-menu {
+  &.open .services-menu {
     opacity: 1;
     visibility: visible;
-    top: calc(100% + 8px);
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
   }
 
-  .service-link {
-    display: block;
-    padding: 11px 13px;
-    color: ${colors.neutral[700]};
+  .services-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-left: 1px solid ${colors.neutral[200]};
+    border-top: 1px solid ${colors.neutral[200]};
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .service-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 13px;
+    border-radius: 10px;
+    color: ${colors.neutral[800]};
     text-decoration: none;
-    border-radius: 9px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
   }
 
-  .service-link:hover {
-    background: rgba(79,70,229,0.06);
+  .service-option:hover {
+    background: rgba(79,70,229,0.07);
     color: ${colors.primary.main};
-    transform: translateX(3px);
+  }
+
+  .service-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(79,70,229,0.09);
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .service-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .service-text small {
+    color: ${colors.neutral[500]};
+    font-size: 10px;
+    font-weight: 400;
   }
 
   @media (max-width: ${breakpoints.md}) {
     width: 100%;
-    text-align: center;
 
     .services-trigger {
       justify-content: center;
@@ -247,19 +300,25 @@ const ServicesDropdown = styled.li`
     .services-menu {
       position: static;
       transform: none;
+      width: 100%;
       box-shadow: none;
       border: none;
-      min-width: 0;
-      width: 100%;
-      padding: 0 0 8px;
-      opacity: 1;
-      visibility: visible;
+      border-radius: 0;
+      padding: 6px 0 10px;
+      background: transparent;
     }
 
-    .service-link {
-      font-size: 16px;
-      text-align: center;
-      padding: 9px;
+    &.open .services-menu {
+      transform: none;
+    }
+
+    .services-menu::before {
+      display: none;
+    }
+
+    .service-option {
+      justify-content: center;
+      padding: 11px;
     }
   }
 `;
@@ -454,29 +513,39 @@ function Navbar() {
             <li><NavLink to="/" active={location.pathname === '/'} onClick={closeMenu}>Home</NavLink></li>
             <li><NavLink to="/tours" active={location.pathname === '/tours'} onClick={closeMenu}>Tours</NavLink></li>
 
-            <ServicesDropdown>
+            <ServicesDropdown className={isCabMenuOpen ? 'open' : ''}>
               <button
                 type="button"
                 className="services-trigger"
-                onClick={() => setIsCabMenuOpen(!isCabMenuOpen)}
+                onClick={() => setIsCabMenuOpen(prev => !prev)}
+                aria-expanded={isCabMenuOpen}
               >
                 Cab Services <span>▾</span>
               </button>
 
-              <div className="services-menu" style={{ opacity: isCabMenuOpen ? 1 : undefined, visibility: isCabMenuOpen ? 'visible' : undefined }}>
+              <div className="services-menu">
                 <Link
                   to="/one-way"
-                  className="service-link"
+                  className="service-option"
                   onClick={closeMenu}
                 >
-                  🚕 One Way
+                  <span className="service-icon">🚕</span>
+                  <span className="service-text">
+                    One Way
+                    <small>Taxi / Cab Service</small>
+                  </span>
                 </Link>
+
                 <Link
                   to="/round-trip"
-                  className="service-link"
+                  className="service-option"
                   onClick={closeMenu}
                 >
-                  🔄 Round Trip
+                  <span className="service-icon">🔄</span>
+                  <span className="service-text">
+                    Round Trip
+                    <small>Taxi / Cab Service</small>
+                  </span>
                 </Link>
               </div>
             </ServicesDropdown>
