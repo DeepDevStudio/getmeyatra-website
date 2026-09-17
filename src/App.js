@@ -16,8 +16,9 @@ import Dashboard from './pages/Dashboard';
 import YatraDetailsPage from './pages/YatraDetailsPage';
 import BookingDetails from './pages/BookingDetails';
 import ToursDetail from './pages/ToursDetail';
-import OneWay from './pages/OneWay';
-import RoundTrip from './pages/RoundTrip';
+import CabServices from './pages/CabServices';
+import ExploreCabs from './pages/ExploreCabs';
+import CabBooking from './pages/CabBooking';
 
 const AppContainer = styled.div`
   display: flex;
@@ -49,8 +50,9 @@ function App() {
             <Route path="/yatra/:id" element={<YatraDetailsPage />} />
             <Route path="/booking-details/:id" element={<BookingDetails />} />
             <Route path="/tours/:id" element={<ToursDetail />} />
-            <Route path="/one-way" element={<OneWay />} />
-            <Route path="/round-trip" element={<RoundTrip />} />
+            <Route path="/cab-services" element={<CabServices />} />
+        <Route path="/explore-cabs" element={<ExploreCabs />} />
+        <Route path="/cab-booking" element={<CabBooking />} />
           </Routes>
         </MainContent>
         <StickyBottomBar />

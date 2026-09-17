@@ -512,41 +512,49 @@ function Navbar() {
           <NavMenu isOpen={isOpen}>
             <li><NavLink to="/" active={location.pathname === '/'} onClick={closeMenu}>Home</NavLink></li>
             <li><NavLink to="/tours" active={location.pathname === '/tours'} onClick={closeMenu}>Tours</NavLink></li>
-
             <ServicesDropdown className={isCabMenuOpen ? 'open' : ''}>
               <button
                 type="button"
                 className="services-trigger"
-                onClick={() => setIsCabMenuOpen(prev => !prev)}
+                onClick={() => setIsCabMenuOpen((previous) => !previous)}
                 aria-expanded={isCabMenuOpen}
               >
-                Cab Services <span>▾</span>
+                Cab Services <span>▼</span>
               </button>
 
               <div className="services-menu">
                 <Link
-                  to="/one-way"
+                  to="/cab-services"
+                  state={{ mode: 'one-way' }}
                   className="service-option"
-                  onClick={closeMenu}
+                  onClick={() => {
+                    setIsCabMenuOpen(false);
+                    closeMenu();
+                  }}
                 >
                   <span className="service-icon">🚕</span>
                   <span className="service-text">
-                    One Way
-                    <small>Taxi / Cab Service</small>
+                    <span>One Way</span>
+                    <small>One-way cab booking</small>
                   </span>
                 </Link>
 
                 <Link
-                  to="/round-trip"
+                  to="/cab-services"
+                  state={{ mode: 'round-trip' }}
                   className="service-option"
-                  onClick={closeMenu}
+                  onClick={() => {
+                    setIsCabMenuOpen(false);
+                    closeMenu();
+                  }}
                 >
                   <span className="service-icon">🔄</span>
                   <span className="service-text">
-                    Round Trip
-                    <small>Taxi / Cab Service</small>
+                    <span>Round Trip</span>
+                    <small>Round-trip cab booking</small>
                   </span>
                 </Link>
+
               </div>
             </ServicesDropdown>
 
