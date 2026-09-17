@@ -560,51 +560,6 @@ function CabBooking() {
 
             <Card>
               <SectionHeader>
-                <SectionTitle>Selected Cab</SectionTitle>
-                <SectionHint>Your selected vehicle</SectionHint>
-              </SectionHeader>
-
-              <CabCard>
-                <CabTop>
-                  <CabIcon>🚕</CabIcon>
-
-                  <CabInfo>
-                    <h3>{cab.cab_type || 'Cab Service'}</h3>
-                    <p>
-                      {bookingData.source || 'Source'} →{' '}
-                      {bookingData.destination || 'Destination'}
-                    </p>
-                  </CabInfo>
-
-                  <CabFare>
-                    <span>Fare</span>
-                    <strong>
-                      ₹{fare ? fare.toLocaleString('en-IN') : '—'}
-                    </strong>
-                  </CabFare>
-                </CabTop>
-
-                <CabMeta>
-                  {isRoundTrip ? (
-                    <>
-                      <Meta>Up to {cab.per_day_limit || '—'} KM / Day</Meta>
-                      <Meta>
-                        ₹{Number(cab.extra_per_km || 0).toLocaleString('en-IN')} / Extra KM
-                      </Meta>
-                      <Meta>Round Trip</Meta>
-                    </>
-                  ) : (
-                    <>
-                      <Meta>{cab.km ? `${cab.km} KM` : 'Distance —'}</Meta>
-                      <Meta>One Way</Meta>
-                    </>
-                  )}
-                </CabMeta>
-              </CabCard>
-            </Card>
-
-            <Card>
-              <SectionHeader>
                 <SectionTitle>Customer Information</SectionTitle>
                 <SectionHint>Required for booking</SectionHint>
               </SectionHeader>
@@ -788,6 +743,47 @@ function CabBooking() {
           </MainColumn>
 
           <SideColumn>
+            <Card>
+              <SectionHeader>
+                <SectionTitle>Selected Cab</SectionTitle>
+                <SectionHint>Your selected vehicle</SectionHint>
+              </SectionHeader>
+
+              <CabCard>
+                <CabTop>
+                  <CabIcon>
+                    {cab.cab_type === 'Bus'
+                      ? '🚌'
+                      : cab.cab_type === 'Tempo Traveller' || cab.cab_type === 'Urbania'
+                        ? '🚐'
+                        : '🚙'}
+                  </CabIcon>
+
+                  <CabInfo>
+                    <h3>{cab.cab_type || 'Cab Service'}</h3>
+                    <p>
+                      {bookingData.source || 'Source'} →{' '}
+                      {bookingData.destination || 'Destination'}
+                    </p>
+                  </CabInfo>
+
+                  <CabFare>
+                    <span>Fare</span>
+                    <strong>
+                      ₹{fare ? fare.toLocaleString('en-IN') : '—'}
+                    </strong>
+                  </CabFare>
+                </CabTop>
+
+                <CabMeta>
+                  <Meta>
+                    {isRoundTrip ? 'Round Trip' : 'One Way'}
+                  </Meta>
+                  <Meta>Fixed Fare</Meta>
+                </CabMeta>
+              </CabCard>
+            </Card>
+
             <Card>
               <SectionHeader>
                 <SectionTitle>Fare Summary</SectionTitle>
